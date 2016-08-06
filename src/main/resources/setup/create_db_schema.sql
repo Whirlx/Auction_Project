@@ -1,4 +1,9 @@
--- create database and schema for auction project
+/********************************************************************
+ Create default database schemsa for auction porject
+ 
+
+********************************************************************/
+
 --CREATE USER 'auction_user'@'localhost' IDENTIFIED BY 'auction_user_pw';
 create user if not exists 'auction_user'@'%' IDENTIFIED BY 'auction_user_pw';
 create database if not exists auction_db  CHARACTER SET utf8 COLLATE utf8_bin;
