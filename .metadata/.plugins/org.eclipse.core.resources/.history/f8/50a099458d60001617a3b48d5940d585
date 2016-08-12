@@ -1,0 +1,95 @@
+package Auction_Project.Auction_Server;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+//import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
+@Path("/") // Full path is: http://localhost:8080/Auction_Server/
+public class MessageHandler {
+	
+	ObjectMapper mapper = new ObjectMapper();
+	JsonMessage message = new JsonMessage();
+	String jsonMessage;
+	
+	@GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String openingMessage() {
+		JsonMessage jsonMessage = new JsonMessage();
+		
+        return jsonMessage;
+    }
+
+	@POST
+	@Path("/crunchifyService")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response crunchifyREST(InputStream incomingData) {
+		StringBuilder crunchifyBuilder = new StringBuilder();
+		try {
+			BufferedReader in = new BufferedReader(new InputStreamReader(incomingData));
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				crunchifyBuilder.append(line);
+			}
+		} catch (Exception e) {
+			System.out.println("Error Parsing: - ");
+		}
+		System.out.println("Data Received: " + crunchifyBuilder.toString());
+ 
+		// return HTTP response 200 in case of success
+		return Response.status(200).entity(crunchifyBuilder.toString()).build();
+	}
+	
+	@GET
+	@Path("/verify")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response verifyRESTService(InputStream incomingData) {
+		String result = "CrunchifyRESTService Successfully started..";
+ 
+		// return HTTP response 200 in case of success
+		return Response.status(200).entity(result).build();
+	}
+	
+    @GET
+    @Path("/get")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String testGet() {
+    	String result = "Get success";
+        return result;
+    }
+    
+    @POST
+	@Path("/post")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response testPost() {
+
+		String result = "Post success";
+		return Response.status(201).entity(result).build();
+
+	}
+    
+    private String createJsonMessage(int messageID, String message) {
+    	JsonMessage jsonMessage = new JsonMessage(messageID, message);
+    	String jsonString="";
+    	try {
+			jsonString = mapper.writeValueAsString(message); //Convert object to JSON string
+		} 
+		catch (JsonGenerationException e)	{ e.printStackTrace(); } 
+		catch (JsonMappingException e)		{ e.printStackTrace(); } 
+		catch (IOException e)				{ e.printStackTrace(); }
+    	return jsonString;
+    }
+}

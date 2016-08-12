@@ -1,0 +1,21 @@
+package Auction_Project.Auction_Server;
+
+public class JsonMessage {
+	
+	private int messageID;
+	private String testString;
+	
+	public int getMessageID() {
+		return messageID;
+	}
+	public void setMessageID(int messageID) {
+		this.messageID = messageID;
+	}
+	public String getTestString() {
+		return testString;
+	}
+	public void setTestString(String testString) {
+		this.testString = testString;
+	}
+	
+}

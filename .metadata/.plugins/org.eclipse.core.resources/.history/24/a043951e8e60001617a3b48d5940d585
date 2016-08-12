@@ -1,0 +1,69 @@
+package Auction_Project.Auction_Server;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+//import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
+@Path("/") // Full path is: http://localhost:8080/Auction_Server/
+public class MessageHandler {
+	
+	@GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String openingMessage()  // Opening message when entering the server
+	{
+		String jsonMessage = createJsonMessage(1, "Welcome to Auction_Server!");
+        return jsonMessage;
+    }
+
+	@POST
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String userLogin(InputStream incomingData) {
+		return "TODO";
+	}
+	
+    @GET
+    @Path("/get")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String testGet() {
+    	String result = "Get success";
+        return result;
+    }
+    
+    @POST
+	@Path("/post")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response testPost() {
+
+		String result = "Post success";
+		return Response.status(201).entity(result).build();
+
+	}
+    
+    private String createJsonMessage(int messageID, String message) {
+    	ObjectMapper mapper = new ObjectMapper();
+    	JsonMessage jsonMessage = new JsonMessage(messageID, message);
+    	String jsonString="";
+    	try {
+			jsonString = mapper.writeValueAsString(jsonMessage); //Convert object to JSON string
+		} 
+		catch (JsonGenerationException e)	{ e.printStackTrace(); } 
+		catch (JsonMappingException e)		{ e.printStackTrace(); } 
+		catch (IOException e)				{ e.printStackTrace(); }
+    	return jsonString;
+    }
+}

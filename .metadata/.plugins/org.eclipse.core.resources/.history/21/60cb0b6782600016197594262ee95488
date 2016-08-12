@@ -1,0 +1,16 @@
+package Auction_Project.Auction_Server;
+
+import javax.ws.rs.Path;
+
+/**
+ * Hello world!
+ *
+ */
+@Path("/") // Full path is: http://localhost:8080/Auction_Server/rest/
+public class App 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+    }
+}

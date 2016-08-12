@@ -1,0 +1,10 @@
+package Auction_Project.Auction_Server;
+
+public class JsonMessage {
+	
+	private int messageID;
+	private String testString;
+	
+	
+	
+}

@@ -1,0 +1,32 @@
+package Auction_Project.Auction_Server;
+
+import java.io.InputStream;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+/**
+ * Hello world!
+ *
+ */
+@Path("/") // Full path is: http://localhost:8080/Auction_Server/rest/
+public class App 
+{
+	@GET
+	@Path("/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response verifyRESTService(InputStream incomingData) {
+		String result = "Main started";
+ 
+		// return HTTP response 200 in case of success
+		return Response.status(200).entity(result).build();
+	}
+	
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+    }
+}
