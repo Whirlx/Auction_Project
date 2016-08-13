@@ -1,0 +1,55 @@
+package Auction_Project.Auction_Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+public class User {
+	 
+    @JsonProperty("ID")
+    private int ID;
+     
+    @JsonProperty("name")
+    private String name;
+    
+    @JsonProperty("bids")
+    private String bids;
+     
+    @JsonProperty("bill-amount")
+    private String amount;
+     
+    public User() {
+    	List<Bid> listOfBids = new ArrayList<Bid>();  
+    	
+    }
+    
+    public int getID() {
+        return ID;
+    }
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+     
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+     
+    public String getBids() {
+        return bids;
+    }
+    public void addBid(String bids) {
+        this.bids = bids;
+    }
+     
+    public String getAmount() {
+        return amount;
+    }
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+     
+}

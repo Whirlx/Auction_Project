@@ -4,7 +4,6 @@
 <fullyQualifiedTypeName name="javax.ws.rs.GET"/>
 <fullyQualifiedTypeName name="javax.ws.rs.Consumes"/>
 <fullyQualifiedTypeName name="javax.ws.rs.POST"/>
-<fullyQualifiedTypeName name="javax.ws.rs.core.Response"/>
 <fullyQualifiedTypeName name="java.io.BufferedReader"/>
 <fullyQualifiedTypeName name="java.io.InputStream"/>
 <fullyQualifiedTypeName name="java.io.InputStreamReader"/>
@@ -12,4 +11,7 @@
 <fullyQualifiedTypeName name="org.codehaus.jackson.JsonGenerationException"/>
 <fullyQualifiedTypeName name="org.codehaus.jackson.map.JsonMappingException"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
+<fullyQualifiedTypeName name="org.codehaus.jackson.annotate.JsonProperty"/>
+<fullyQualifiedTypeName name="javax.ws.rs.core.Response"/>
+<fullyQualifiedTypeName name="org.codehaus.jackson.annotate.JsonPropertyOrder"/>
 </qualifiedTypeNameHistroy>

@@ -1,0 +1,90 @@
+package Auction_Project.Auction_Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+public class User {
+	
+    @JsonProperty("ID")
+    private int ID = 0;
+     
+    @JsonProperty("name")
+    private String name = "default";
+    
+    @JsonProperty("bids")
+    private List<Bid> listOfBids;
+    
+    @JsonProperty("items")
+    private List<Item> listOfItems;
+     
+    @JsonProperty("balance")
+    private int balance = 0;
+     
+    public User() {
+    	this.listOfBids = new ArrayList<Bid>();
+    	this.listOfItems = new ArrayList<Item>();
+    }
+    
+    @JsonProperty("ID")
+    public int getID() {
+        return ID;
+    }
+    
+    @JsonProperty("ID")
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+    
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
+    
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @JsonProperty("bids")
+    public List<Bid> getBidsList() {
+        return this.listOfBids;
+    }
+    
+    @JsonProperty("bids")
+    public void addBid(Bid bid) {
+    	this.listOfBids.add(bid);
+    }
+    
+    @JsonProperty("bids")
+    public void removeBid(Bid bid) {
+    	this.listOfBids.remove(bid);
+    }
+    
+    @JsonProperty("items")
+    public List<Item> getItemsList() {
+        return this.listOfItems;
+    }
+    
+    @JsonProperty("items")
+    public void addItem(Item item) {
+    	this.listOfItems.add(item);
+    }
+    
+    @JsonProperty("items")
+    public void removeItem(Item item) {
+    	this.listOfItems.remove(item);
+    }
+    
+    @JsonProperty("balance")
+    public int getBalance() {
+        return this.balance;
+    }
+    
+    @JsonProperty("balance")
+    public void addBalance(int addedBalance) {
+        this.balance = addedBalance;
+    }
+     
+}

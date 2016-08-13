@@ -1,0 +1,48 @@
+package Auction_Project.Auction_Server;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+public class User {
+	 
+    @JsonProperty("ID")
+    private int ID;
+     
+    @JsonProperty
+    private String custmer;
+    
+    @JsonProperty("address")
+    private String address;
+     
+    @JsonProperty("bill-amount")
+    private String amount;
+     
+     
+    public int getID() {
+        return ID;
+    }
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+     
+    public String getCustmer() {
+        return custmer;
+    }
+    public void setCustmer(String custmer) {
+        this.custmer = custmer;
+    }
+     
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
+     
+    public String getAmount() {
+        return amount;
+    }
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+     
+}

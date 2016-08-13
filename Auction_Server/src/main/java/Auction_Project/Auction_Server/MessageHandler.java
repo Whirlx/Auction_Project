@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 //import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -21,7 +22,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 @Path("/") // Full path is: http://localhost:8080/Auction_Server/
 public class MessageHandler {
 	
-	@GET
+	/*	##########################################
+	 *  ########## Server root function ##########
+	 *  ##########################################
+	 */ 
+	
+	@GET // Works
     @Produces(MediaType.APPLICATION_JSON)
     public String openingMessage()  // Opening message when entering the server
 	{
@@ -29,20 +35,86 @@ public class MessageHandler {
         return jsonMessage;
     }
 
-	@POST
-	@Path("/login")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public String userLogin(InputStream incomingData) {
-		return "TODO";
-	}
+	/*	####################################
+	 *  ########## @GET Functions ##########
+	 *  ####################################
+	 */ 
 	
-    @GET
-    @Path("/get")
+	@GET // Works
+    @Path("/test")
     @Produces(MediaType.APPLICATION_JSON)
-    public String testGet() {
+    public Response test() {
+		String jsonString = "{\"messageID\":2,\"testString\":\"Testing.\"}";
+		return Response.status(200).entity(jsonString).build();
+    }
+	
+	@GET
+    @Path("/viewBids")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String viewBids() {
     	String result = "Get success";
         return result;
     }
+	
+	@GET
+    @Path("/item")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getItemDetails() {
+    	String result = "Get success";
+        return result;
+    }
+	
+	@GET
+    @Path("/auctionDetails")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getAuctionDetails() {
+    	String result = "Get success";
+        return result;
+    }
+	
+	/*	#####################################
+	 *  ########## @POST Functions ##########
+	 *  #####################################
+	 */ 
+	
+	@POST
+	@Path("/register")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response registerUser(User inputUser) {
+		System.out.println("[Register Request] -> "+inputUser.getName()+"\n");
+		User newUser = new User();
+		newUser.setID(inputUser.getID());
+		newUser.setName(inputUser.getName());
+		newUser.addBalance(inputUser.getBalance());
+		return Response.status(200).entity(newUser).build();
+	}
+	
+	@POST
+	@Path("/login")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String loginUser(InputStream incomingData) {
+		return "TODO";
+	}
+	
+	@POST
+	@Path("/addItem")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String addItem(InputStream incomingData) {
+		return "TODO";
+	}
+	
+	@POST
+	@Path("/bid")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String bidOnItem(InputStream incomingData) {
+		return "TODO";
+	}
+	
+	/*	#####################################
+	 *  ########## Class Functions ##########
+	 *  #####################################
+	 */ 
     
     private String createJsonMessage(int messageID, String message) {
     	ObjectMapper mapper = new ObjectMapper();
