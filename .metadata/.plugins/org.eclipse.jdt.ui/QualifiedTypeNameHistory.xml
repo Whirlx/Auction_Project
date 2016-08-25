@@ -26,4 +26,5 @@
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="javax.ws.rs.PathParam"/>
 <fullyQualifiedTypeName name="org.codehaus.jackson.annotate.JsonProperty"/>
+<fullyQualifiedTypeName name="javax.ws.rs.PUT"/>
 </qualifiedTypeNameHistroy>

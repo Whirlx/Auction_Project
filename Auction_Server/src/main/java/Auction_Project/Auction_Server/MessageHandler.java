@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -28,6 +29,7 @@ public class MessageHandler {
 	private static HashMap<Integer, Item> mapOfItems = new HashMap<Integer, Item>();
 	private static HashMap<Integer, Bid> mapOfBids = new HashMap<Integer, Bid>();
 	private static int numOfUsers = 0;
+	private static int numOfItems = 0;
 	
 	// |=================================================|
 	// |               Server Root Function              |
@@ -65,7 +67,7 @@ public class MessageHandler {
 		User newUser = new User(inputUser);
 		numOfUsers++;
 		newUser.setID(numOfUsers);
-		mapOfUsers.put(newUser.getID(), newUser);
+		mapOfUsers.put(numOfUsers, newUser);
 		InfoMessage message = new InfoMessage(1, "User "+newUser.getFullName()+" (ID:"+numOfUsers+") has been successfully registered.");
 		Gson gson = new Gson();
 		String jsonMessage = gson.toJson(message);
@@ -80,15 +82,12 @@ public class MessageHandler {
 	@GET 
     @Path("/users/{reqId}") // Path = http://localhost:8080/Auction_Server/users/1/?id=3&password=123abc
     public Response userProfile(@PathParam("reqId") int requestedUserID, @QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( mapOfUsers.containsKey(userID) )
+		if( isAuthentic(userID, password) )
 		{
-			if ( mapOfUsers.get(userID).getPassword().compareTo(password) == 0 )
-			{
-				Gson gson = new Gson();
-				String jsonMessage = gson.toJson(mapOfUsers.get(requestedUserID));
-				logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> User "+requestedUserID+" Profile");
-				return Response.status(200).entity(jsonMessage).build();
-			}
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(mapOfUsers.get(requestedUserID));
+			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> User "+requestedUserID+" Profile");
+			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting profile failed.");
 		Gson gson = new Gson();
@@ -102,17 +101,14 @@ public class MessageHandler {
 	// |============================================|
 	
 	@GET 
-    @Path("/users") // Path = http://localhost:8080/Auction_Server/users
+    @Path("/users") // Path = http://localhost:8080/Auction_Server/users/?id=3&password=123abc
     public Response getUsers(@QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( mapOfUsers.containsKey(userID) )
+		if( isAuthentic(userID, password) )
 		{
-			if ( mapOfUsers.get(userID).getPassword().compareTo(password) == 0 )
-			{
-				Gson gson = new Gson();
-				String jsonMessage = gson.toJson(mapOfUsers);
-				logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View all users");
-				return Response.status(200).entity(jsonMessage).build();
-			}
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(mapOfUsers);
+			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View all users");
+			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting all users failed.");
 		Gson gson = new Gson();
@@ -121,22 +117,37 @@ public class MessageHandler {
 		return Response.status(400).entity(jsonMessage).build();
     }
 	
-	// |========================================|
-	// |               View Items               |
-	// |========================================|
+	// |=============================================|
+	// |               View user items               |
+	// |=============================================|
 	
 	@GET 
-    @Path("/items/") // Path = http://localhost:8080/Auction_Server/bids/?id=3&password=123abc
-    public Response viewItems(@QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( mapOfUsers.containsKey(userID) )
+    @Path("/users/{reqId}/items") // Path = http://localhost:8080/Auction_Server/users/1/?id=3&password=123abc
+    public Response viewUserItems(@PathParam("reqId") int requestedUserID, @QueryParam("id") int userID, @QueryParam("password") String password) {
+		if( isAuthentic(userID, password) )
 		{
-			if ( mapOfUsers.get(userID).getPassword() == password )
+			if( requestedUserID == userID )
 			{
-				Gson gson = new Gson();
-				String jsonMessage = gson.toJson(mapOfItems);
-				logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View Items");
-				return Response.status(200).entity(jsonMessage).build();
+				// price
+				// buyers info
 			}
+		}
+		return Response.status(200).entity("view user items").build();
+    }
+	
+	// |============================================|
+	// |               View all Items               |
+	// |============================================|
+	
+	@GET 
+    @Path("/items/") // Path = http://localhost:8080/Auction_Server/items/?id=3&password=123abc
+    public Response viewItems(@QueryParam("id") int userID, @QueryParam("password") String password) {
+		if( isAuthentic(userID, password) )
+		{
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(mapOfItems);
+			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View Items");
+			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting items failed.");
 		Gson gson = new Gson();
@@ -150,22 +161,19 @@ public class MessageHandler {
 	// |=======================================|
 	
 	@GET 
-    @Path("/items/{id}") // Path = http://localhost:8080/Auction_Server/bids/?id=3&password=123abc
-    public Response viewItem(@PathParam("id") int id, @QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( mapOfUsers.containsKey(userID) )
+    @Path("/items/{id}") // Path = http://localhost:8080/Auction_Server/items/1/?id=3&password=123abc
+    public Response viewItem(@PathParam("id") int itemID, @QueryParam("id") int userID, @QueryParam("password") String password) {
+		if( isAuthentic(userID, password) )
 		{
-			if ( mapOfUsers.get(userID).getPassword() == password )
-			{
-				Gson gson = new Gson();
-				String jsonMessage = gson.toJson(mapOfItems.get(id));
-				logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View Item "+id);
-				return Response.status(200).entity(jsonMessage).build();
-			}
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(mapOfItems.get(itemID));
+			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View Item "+itemID);
+			return Response.status(200).entity(jsonMessage).build();
 		}
-		InfoMessage message = new InfoMessage(-1, "Error: Getting item "+id+" failed.");
+		InfoMessage message = new InfoMessage(-1, "Error: Getting item "+itemID+" failed.");
 		Gson gson = new Gson();
 		String jsonMessage = gson.toJson(message);
-		logger.warning("Failed getting item "+id+" for user ID "+userID);
+		logger.warning("Failed getting item "+itemID+" for user ID "+userID);
 		return Response.status(400).entity(jsonMessage).build();
     }
 	
@@ -173,35 +181,70 @@ public class MessageHandler {
 	// |               Bid on item               |
 	// |=========================================|
 	
-	@POST 
-    @Path("/items/{id}/bid") // Path = http://localhost:8080/Auction_Server/bids/?id=3&password=123abc
+	@PUT 
+    @Path("/items/{id}/bid") // Path = http://localhost:8080/Auction_Server/items/1/bid/?id=3&password=123abc
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response bidItem(int price, @PathParam("id") int id, @QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( mapOfUsers.containsKey(userID) )
+    public Response bidItem(int price, @PathParam("id") int itemID, @QueryParam("id") int userID, @QueryParam("password") String password) {
+		if( isAuthentic(userID, password) )
 		{
-			if ( mapOfUsers.get(userID).getPassword() == password )
-			{
-				mapOfItems.get(id).setLatestBid(price);
-				InfoMessage message = new InfoMessage(2, "Successfully bid on item "+id);
-				Gson gson = new Gson();
-				String jsonMessage = gson.toJson(message);
-				logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> Bid Item "+id);
-				return Response.status(200).entity(jsonMessage).build();
-			}
+			mapOfItems.get(itemID).setLatestBidPrice(price);
+			InfoMessage message = new InfoMessage(2, "Successfully bid on item "+itemID);
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(message);
+			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> Bid Item "+itemID);
+			return Response.status(200).entity(jsonMessage).build();
 		}
-		InfoMessage message = new InfoMessage(-1, "Error: Bid on item "+id+" failed.");
+		InfoMessage message = new InfoMessage(-1, "Error: Bid on item "+itemID+" failed.");
 		Gson gson = new Gson();
 		String jsonMessage = gson.toJson(message);
-		logger.warning("Failed bid on item "+id+" by user ID "+userID);
+		logger.warning("Failed bid on item "+itemID+" by user ID "+userID);
 		return Response.status(400).entity(jsonMessage).build();
     }
 	
+	// |=====================================================|
+	// |               Put item up for auction               |
+	// |=====================================================|
+	
+	@POST 
+    @Path("/items/add") // Path = http://localhost:8080/Auction_Server/items/add/?id=3&password=123abc
+	@Consumes(MediaType.APPLICATION_JSON)
+    public Response addItem(Item inputItem, @PathParam("id") int itemID, @QueryParam("id") int userID, @QueryParam("password") String password) {
+		if( isAuthentic(userID, password) )
+		{
+			Item newItem = new Item(inputItem);
+			numOfItems++;
+			newItem.setItemID(numOfItems);
+			mapOfItems.put(numOfItems, newItem);
+			mapOfUsers.get(userID).addItem(newItem);
+			InfoMessage message = new InfoMessage(3, "Item has been successfully added.");
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(message);
+			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> Add item "+itemID);
+			return Response.status(200).entity(jsonMessage).build();
+		}
+		InfoMessage message = new InfoMessage(-1, "Error: item add fail.");
+		Gson gson = new Gson();
+		String jsonMessage = gson.toJson(message);
+		logger.warning("Failed to add item "+itemID+" by user ID "+userID);
+		return Response.status(400).entity(jsonMessage).build();
+    }
 	
 	/*	#####################################
 	 *  ########## Class Functions ##########
 	 *  #####################################
 	 */ 
     
+	private boolean isAuthentic(int userID, String password) {
+		if( mapOfUsers.containsKey(userID) )
+		{
+			if ( mapOfUsers.get(userID).getPassword().compareTo(password) == 0 )
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
     private String createJsonMessage(int messageID, String message) {
     	ObjectMapper mapper = new ObjectMapper();
     	JsonMessage jsonMessage = new JsonMessage(messageID, message);

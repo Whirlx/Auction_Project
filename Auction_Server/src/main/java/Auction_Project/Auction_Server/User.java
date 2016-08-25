@@ -15,6 +15,8 @@ public class User {
     private List<Item> listOfItems;
     private List<Bid> listOfBids;
      
+    public User() {}
+    
     public User(int ID, String password, String firstName, String lastName, String description) {
     	this.ID = ID;
     	this.password = password;
@@ -35,8 +37,6 @@ public class User {
     	this.listOfBids = new ArrayList<Bid>();
     }
     
-    public User() {}
-
     @JsonProperty("ID")
 	public int getID() {
 		return ID;
@@ -90,8 +90,8 @@ public class User {
 		return listOfItems;
 	}
 
-	public void setListOfItems(List<Item> listOfItems) {
-		this.listOfItems = listOfItems;
+	public void addItem(Item item) {
+		this.listOfItems.add(item);
 	}
 
 	public List<Bid> getListOfBids() {
