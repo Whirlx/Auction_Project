@@ -4,73 +4,102 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
-@JsonPropertyOrder({ "ID", "name", "balance", "bids", "items" })
 public class User {
 	
-    private int ID = 0;
-    private String name = "default";
-    private List<Bid> listOfBids;
+    private int ID;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String description;
     private List<Item> listOfItems;
-    private int balance = 0;
+    private List<Bid> listOfBids;
      
-    public User() {
-    	this.listOfBids = new ArrayList<Bid>();
+    public User(int ID, String password, String firstName, String lastName, String description) {
+    	this.ID = ID;
+    	this.password = password;
+    	this.firstName = firstName;
+    	this.lastName = lastName;
+    	this.description = description;
     	this.listOfItems = new ArrayList<Item>();
+    	this.listOfBids = new ArrayList<Bid>();
     }
     
+    public User(User user) {
+    	this.ID = user.getID();
+    	this.password = user.getPassword();
+    	this.firstName = user.getFirstName();
+    	this.lastName = user.getLastName();
+    	this.description = user.getDescription();
+    	this.listOfItems = new ArrayList<Item>();
+    	this.listOfBids = new ArrayList<Bid>();
+    }
+    
+    public User() {}
+
     @JsonProperty("ID")
-    public int getID() {
-        return this.ID;
-    }
-    
-    public void setID(int ID) {
-        this.ID = ID;
-    }
-    
-    @JsonProperty("name")
-    public String getName() {
-        return this.name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    @JsonProperty("bids")
-    public List<Bid> getBidsList() {
-        return this.listOfBids;
-    }
-    
-    public void addBid(Bid bid) {
-    	this.listOfBids.add(bid);
-    }
-    
-    public void removeBid(Bid bid) {
-    	this.listOfBids.remove(bid);
-    }
-    
-    @JsonProperty("items")
-    public List<Item> getItemsList() {
-        return this.listOfItems;
-    }
-    
-    public void addItem(Item item) {
-    	this.listOfItems.add(item);
-    }
-    
-    public void removeItem(Item item) {
-    	this.listOfItems.remove(item);
-    }
-    
-    @JsonProperty("balance")
-    public int getBalance() {
-        return this.balance;
-    }
-    
-    public void addBalance(int addedBalance) {
-        this.balance = addedBalance;
-    }
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int ID) {
+		this.ID = ID;
+	}
+
+	@JsonProperty("password")
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getFullName() {
+		return firstName+" "+lastName;
+	}
+	
+	@JsonProperty("firstName")
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	@JsonProperty("lastName")
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	@JsonProperty("description")
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Item> getListOfItems() {
+		return listOfItems;
+	}
+
+	public void setListOfItems(List<Item> listOfItems) {
+		this.listOfItems = listOfItems;
+	}
+
+	public List<Bid> getListOfBids() {
+		return listOfBids;
+	}
+
+	public void setListOfBids(List<Bid> listOfBids) {
+		this.listOfBids = listOfBids;
+	}
      
 }

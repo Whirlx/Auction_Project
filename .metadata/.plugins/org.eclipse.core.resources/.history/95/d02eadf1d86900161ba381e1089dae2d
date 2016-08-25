@@ -1,0 +1,22 @@
+package Auction_Project.Auction_Server;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+public class Item {
+	
+	private int itemID;
+	private String itemName;
+	private String itemDescription;
+	private int userID;
+	private int startingPrice;
+	private int latestBid;
+	private int numOfOffers;
+	private String bidStartDate;
+	private String bidEndDate;
+	
+	public Item() {
+		bidStartDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+		bidEndDate = new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime());
+	}
+}

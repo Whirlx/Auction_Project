@@ -1,0 +1,20 @@
+package Auction_Project.Auction_Server;
+
+public class InfoMessage {
+	
+	private int messageID;
+	private String message;
+	
+	public int getMessageID() {
+		return messageID;
+	}
+	public void setMessageID(int messageID) {
+		this.messageID = messageID;
+	}
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
+}

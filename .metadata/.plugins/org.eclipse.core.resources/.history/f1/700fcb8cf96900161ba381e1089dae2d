@@ -1,0 +1,26 @@
+package Auction_Project.Auction_Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class User {
+	
+    private int ID;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String description;
+    private List<Item> listOfItems;
+    private List<Bid> listOfBids;
+     
+    public User(int ID, String password, String firstName, String lastName, String description) {
+    	this.ID = ID;
+    	this.password = password;
+    	this.firstName = firstName;
+    	this.lastName = lastName;
+    	this.description = description;
+    	this.listOfItems = new ArrayList<Item>();
+    	this.listOfBids = new ArrayList<Bid>();
+    }
+     
+}

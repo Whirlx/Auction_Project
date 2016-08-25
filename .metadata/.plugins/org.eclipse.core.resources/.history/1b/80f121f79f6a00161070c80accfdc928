@@ -1,0 +1,97 @@
+package Auction_Project.Auction_Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class User {
+	
+    private int ID;
+    private String password;
+    private String firstName;
+    private String lastName;
+    private String description;
+    private List<Item> listOfItems;
+    private List<Bid> listOfBids;
+     
+    public User(int ID, String password, String firstName, String lastName, String description) {
+    	this.ID = ID;
+    	this.password = password;
+    	this.firstName = firstName;
+    	this.lastName = lastName;
+    	this.description = description;
+    	this.listOfItems = new ArrayList<Item>();
+    	this.listOfBids = new ArrayList<Bid>();
+    }
+    
+    public User(User user) {
+    	this.ID = user.getID();
+    	this.password = user.getPassword();
+    	this.firstName = user.getFirstName();
+    	this.lastName = user.getLastName();
+    	this.description = user.getDescription();
+    	this.listOfItems = new ArrayList<Item>();
+    	this.listOfBids = new ArrayList<Bid>();
+    }
+
+	public int getID() {
+		return ID;
+	}
+
+	public void setID(int ID) {
+		this.ID = ID;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	
+	public String getFullName() {
+		return firstName+" "+lastName;
+	}
+	
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Item> getListOfItems() {
+		return listOfItems;
+	}
+
+	public void setListOfItems(List<Item> listOfItems) {
+		this.listOfItems = listOfItems;
+	}
+
+	public List<Bid> getListOfBids() {
+		return listOfBids;
+	}
+
+	public void setListOfBids(List<Bid> listOfBids) {
+		this.listOfBids = listOfBids;
+	}
+     
+}
