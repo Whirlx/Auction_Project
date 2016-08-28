@@ -1,0 +1,100 @@
+package Auction_Project.Auction_Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+public class User {
+	
+    private int user_id;
+    private String user_name;
+	private String user_pwd;
+    private String first_name;
+    private String last_name;
+    private String description;
+    private List<Item> listOfItems;
+     
+    public User() {}
+    
+    public User(int user_id, String user_pwd, String first_name, String last_name, String description) {
+    	this.user_id = user_id;
+    	this.user_pwd = user_pwd;
+    	this.first_name = first_name;
+    	this.last_name = last_name;
+    	this.description = description;
+    	this.listOfItems = new ArrayList<Item>();
+    }
+    
+    public User(User user) {
+    	this.user_id = user.getUserId();
+    	this.user_pwd = user.getPassword();
+    	this.first_name = user.getFirstName();
+    	this.last_name = user.getLastName();
+    	this.description = user.getDescription();
+    	this.listOfItems = new ArrayList<Item>();
+    }
+    
+    @JsonProperty("user_id")
+	public int getUserId() {
+		return user_id;
+	}
+
+	public void setUserId(int user_id) {
+		this.user_id = user_id;
+	}
+	
+	@JsonProperty("user_name")
+	public String getUserName() {
+		return user_name;
+	}
+
+	public void setUserName(String user_name) {
+		this.user_name = user_name;
+	}
+
+	@JsonProperty("user_pwd")
+	public String getPassword() {
+		return user_pwd;
+	}
+
+	public void setPassword(String user_pwd) {
+		this.user_pwd = user_pwd;
+	}
+	
+	@JsonProperty("first_name")
+	public String getFirstName() {
+		return first_name;
+	}
+
+	public void setFirstName(String first_name) {
+		this.first_name = first_name;
+	}
+
+	@JsonProperty("last_name")
+	public String getLastName() {
+		return last_name;
+	}
+
+	public void setLastName(String last_name) {
+		this.last_name = last_name;
+	}
+
+	@JsonProperty("description")
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Item> getListOfItems() {
+		return listOfItems;
+	}
+
+	public void addItem(Item item) {
+		this.listOfItems.add(item);
+	}
+     
+}

@@ -1,6 +1,5 @@
 package Auction_Project.Auction_Server;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -15,9 +14,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import com.google.gson.Gson;
 
 @Path("/") // Full path is: http://localhost:8080/Auction_Server/
@@ -27,7 +23,6 @@ public class MessageHandler {
 	public static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
 	private static HashMap<Integer, User> mapOfUsers = new HashMap<Integer, User>();
 	private static HashMap<Integer, Item> mapOfItems = new HashMap<Integer, Item>();
-	private static HashMap<Integer, Bid> mapOfBids = new HashMap<Integer, Bid>();
 	private static int numOfUsers = 0;
 	private static int numOfItems = 0;
 	
@@ -66,12 +61,12 @@ public class MessageHandler {
 		
 		User newUser = new User(inputUser);
 		numOfUsers++;
-		newUser.setID(numOfUsers);
+		newUser.setUserId(numOfUsers);
 		mapOfUsers.put(numOfUsers, newUser);
-		InfoMessage message = new InfoMessage(1, "User "+newUser.getFullName()+" (ID:"+numOfUsers+") has been successfully registered.");
+		InfoMessage message = new InfoMessage(1, "User "+newUser.getUserName()+" (ID:"+numOfUsers+") has been successfully registered.");
 		Gson gson = new Gson();
 		String jsonMessage = gson.toJson(message);
-		logger.info("["+inputUser.getFullName()+"] has successfully registered to the Auction Server.");
+		logger.info("["+inputUser.getUserName()+"] has successfully registered to the Auction Server.");
 		return Response.status(201).entity(jsonMessage).build();
 	}
 	
@@ -86,7 +81,7 @@ public class MessageHandler {
 		{
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(mapOfUsers.get(requestedUserID));
-			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> User "+requestedUserID+" Profile");
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> User "+requestedUserID+" Profile");
 			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting profile failed.");
@@ -107,7 +102,7 @@ public class MessageHandler {
 		{
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(mapOfUsers);
-			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View all users");
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> View all users");
 			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting all users failed.");
@@ -146,7 +141,7 @@ public class MessageHandler {
 		{
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(mapOfItems);
-			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View Items");
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> View Items");
 			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting items failed.");
@@ -167,7 +162,7 @@ public class MessageHandler {
 		{
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(mapOfItems.get(itemID));
-			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> View Item "+itemID);
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> View Item "+itemID);
 			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Getting item "+itemID+" failed.");
@@ -187,11 +182,11 @@ public class MessageHandler {
     public Response bidItem(int price, @PathParam("id") int itemID, @QueryParam("id") int userID, @QueryParam("password") String password) {
 		if( isAuthentic(userID, password) )
 		{
-			mapOfItems.get(itemID).setLatestBidPrice(price);
+			mapOfItems.get(itemID).setItemLastBidPrice(price);
 			InfoMessage message = new InfoMessage(2, "Successfully bid on item "+itemID);
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(message);
-			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> Bid Item "+itemID);
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> Bid Item "+itemID);
 			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: Bid on item "+itemID+" failed.");
@@ -215,11 +210,10 @@ public class MessageHandler {
 			numOfItems++;
 			newItem.setItemID(numOfItems);
 			mapOfItems.put(numOfItems, newItem);
-			mapOfUsers.get(userID).addItem(newItem);
 			InfoMessage message = new InfoMessage(3, "Item has been successfully added.");
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(message);
-			logger.info("["+mapOfUsers.get(userID).getFullName()+"] -> Add item "+itemID);
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> Add item "+itemID);
 			return Response.status(200).entity(jsonMessage).build();
 		}
 		InfoMessage message = new InfoMessage(-1, "Error: item add fail.");
@@ -245,16 +239,4 @@ public class MessageHandler {
 		return false;
 	}
 	
-    private String createJsonMessage(int messageID, String message) {
-    	ObjectMapper mapper = new ObjectMapper();
-    	JsonMessage jsonMessage = new JsonMessage(messageID, message);
-    	String jsonString="";
-    	try {
-			jsonString = mapper.writeValueAsString(jsonMessage); //Convert object to JSON string
-		} 
-		catch (JsonGenerationException e)	{ e.printStackTrace(); } 
-		catch (JsonMappingException e)		{ e.printStackTrace(); } 
-		catch (IOException e)				{ e.printStackTrace(); }
-    	return jsonString;
-    }
 }

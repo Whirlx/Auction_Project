@@ -1,0 +1,104 @@
+package Auction_Project.Auction_Server;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+public class User {
+	
+    private int user_id;
+    private String user_name;
+	private String user_pwd;
+    private String firstName;
+    private String lastName;
+    private String description;
+    private List<Item> listOfItems;
+     
+    public User() {}
+    
+    public User(int user_id, String user_pwd, String firstName, String lastName, String description) {
+    	this.user_id = user_id;
+    	this.user_pwd = user_pwd;
+    	this.firstName = firstName;
+    	this.lastName = lastName;
+    	this.description = description;
+    	this.listOfItems = new ArrayList<Item>();
+    }
+    
+    public User(User user) {
+    	this.user_id = user.getUserId();
+    	this.user_pwd = user.getPassword();
+    	this.firstName = user.getFirstName();
+    	this.lastName = user.getLastName();
+    	this.description = user.getDescription();
+    	this.listOfItems = new ArrayList<Item>();
+    }
+    
+    @JsonProperty("user_id")
+	public int getUserId() {
+		return user_id;
+	}
+
+	public void setUserId(int user_id) {
+		this.user_id = user_id;
+	}
+	
+	@JsonProperty("user_name")
+	public String getUserName() {
+		return user_name;
+	}
+
+	public void setUserName(String user_name) {
+		this.user_name = user_name;
+	}
+
+	@JsonProperty("user_pwd")
+	public String getPassword() {
+		return user_pwd;
+	}
+
+	public void setPassword(String user_pwd) {
+		this.user_pwd = user_pwd;
+	}
+
+	public String getFullName() {
+		return firstName+" "+lastName;
+	}
+	
+	@JsonProperty("firstName")
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	@JsonProperty("lastName")
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	@JsonProperty("description")
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Item> getListOfItems() {
+		return listOfItems;
+	}
+
+	public void addItem(Item item) {
+		this.listOfItems.add(item);
+	}
+     
+}
