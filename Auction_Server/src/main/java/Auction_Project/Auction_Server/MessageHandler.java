@@ -124,13 +124,13 @@ public class MessageHandler
 	
 	@GET 
     @Path("/users2") // Path = http://localhost:8080/Auction_Server/users/?id=3&password=123abc
-    public Response getUsers2(@QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( isAuthentic(userID, password) )
+    public Response getUsers2(@QueryParam("username") String userName, @QueryParam("password") String password) {
+		if( isAuthentic(userName, password) )
 		{
 
 			Gson gson = new Gson();
 			String jsonMessage = gson.toJson(mapOfUsers);
-			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> View all users");
+			logger.info("["+mapOfUsers.get(userName).getUserName()+"] -> View all users");
 			return Response.status(200).entity(jsonMessage).build();
 		}
 
@@ -242,30 +242,9 @@ public class MessageHandler
 		}
 
 
-		
-		InfoMessage message = new InfoMessage(-1, "Error: Getting all users failed.");
-		Gson gson = new Gson();
-		String jsonMessage = gson.toJson(message);
-		logger.warning("Failed viewing all users for user ID "+userID);
-		return Response.status(400).entity(jsonMessage).build();
-    }
-	
-	// |=============================================|
-	// |               View user items               |
-	// |=============================================|
-	
-	@GET 
-    @Path("/users/{reqId}/items") // Path = http://localhost:8080/Auction_Server/users/1/?id=3&password=123abc
-    public Response viewUserItems(@PathParam("reqId") int requestedUserID, @QueryParam("id") int userID, @QueryParam("password") String password) {
-		if( isAuthentic(userID, password) )
-		{
-			if( requestedUserID == userID )
-			{
-				// price
-				// buyers info
-			}
-		}
-		return Response.status(200).entity("view user items").build();
+		String message = "Error: Getting all users failed.";
+		logger.warning("Failed viewing all users for user ID "+userName);
+		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
 	// |========================================|
