@@ -10,22 +10,24 @@
 		<property name="hibernate.connection.username">auction_user</property>
 		<property name="hibernate.connection.password">auction_user_pw</property>
 		<!-- Connection Pool Size -->
-		<property name="hibernate.connection.pool_size">1</property>
+		<property name="hibernate.connection.pool_size">10</property>
+		
+		<property name="hibernate.connection.datasource">java:comp/env/jdbc/MyLocalDB</property>
 		
 		<!-- org.hibernate.HibernateException: No CurrentSessionContext configured! -->
 		<property name="hibernate.current_session_context_class">thread</property>
 		
 		<!-- Outputs the SQL queries, should be disabled in Production -->
 		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.format_sql">true</property>
 		
 		<!-- Dialect is required to let Hibernate know the Database Type, MySQL, Oracle etc
 			Hibernate 4 automatically figure out Dialect from Database Connection Metadata -->
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property> 
 
 		<!-- Mapping with model class containing annotations -->
-		<mapping class="Auction_Project.Auction_Server.hibernate.model.Employee1"/>
-		<mapping class="Auction_Project.Auction_Server.hibernate.model.Employee"/>
-		<mapping class="Auction_Project.Auction_Server.hibernate.model.users"/>
+		<mapping package="Auction_Project.Auction_Server.hibernate.model"/>
+		<mapping class="Auction_Project.Auction_Server.hibernate.model.user"/>
 		
 	</session-factory>
 </hibernate-configuration>
