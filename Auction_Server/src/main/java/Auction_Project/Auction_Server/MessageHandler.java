@@ -1,7 +1,14 @@
 package Auction_Project.Auction_Server;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Logger;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -15,6 +22,22 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import com.google.gson.Gson;
+
+import Auction_Project.Auction_Server.hibernate.HibernateUtil;
+import Auction_Project.Auction_Server.hibernate.Impl.userImpl;
+import Auction_Project.Auction_Server.hibernate.model.user;
+
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+
+
 
 @Path("/") // Full path is: http://localhost:8080/Auction_Server/
 @Produces(MediaType.APPLICATION_JSON)
@@ -105,6 +128,138 @@ public class MessageHandler {
 			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> View all users");
 			return Response.status(200).entity(jsonMessage).build();
 		}
+		InfoMessage message = new InfoMessage(-1, "Error: Getting all users failed.");
+		Gson gson = new Gson();
+		String jsonMessage = gson.toJson(message);
+		logger.warning("Failed viewing all users for user ID "+userID);
+		return Response.status(400).entity(jsonMessage).build();
+    }
+	
+	// |============================================|
+	// |               View all users2               |
+	// |============================================|
+	
+	@GET 
+    @Path("/users2") // Path = http://localhost:8080/Auction_Server/users/?id=3&password=123abc
+    public Response getUsers2(@QueryParam("id") int userID, @QueryParam("password") String password) {
+		if( isAuthentic(userID, password) )
+		{
+
+			Gson gson = new Gson();
+			String jsonMessage = gson.toJson(mapOfUsers);
+			logger.info("["+mapOfUsers.get(userID).getUserName()+"] -> View all users");
+			return Response.status(200).entity(jsonMessage).build();
+		}
+
+		logger.info("get all users using hibernate method ");
+		
+		//helper h= new helper();
+		//h.getSession();
+		try {
+
+			/*
+			Context initContext = new InitialContext();
+			Context envContext  = (Context)initContext.lookup("java:/comp/env");
+			DataSource ds = (DataSource)envContext.lookup("jdbc/MyLocalDB");
+			Connection conn = ds.getConnection();
+			*/
+			
+					
+			//etc.
+			
+			//getNameInNamespace
+			//Context initContext = new InitialContext();
+			//InitialContext envContext  = initCtx.lookup("java:/comp/env");
+			//SessionFactory sessionFactoryx = (SessionFactory) ((InitialContext) envContext).lookup("jdbc/MyLocalDB");
+
+			//initCtx.lookup("java:comp/env/jdbc/MyLocalDB");
+			//SessionFactory sessionFactoryx = (SessionFactory) initCtx.lookup("java:comp/env/jdbc/MyLocalDB");
+
+			  //Context initContext = new InitialContext();
+	          //  Context envContext  = (Context)initContext.lookup("java:/comp/env");
+	          //  DataSource ds = (DataSource)envContext.lookup("jdbc/slingemp");
+			
+			logger.info("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
+
+			user u = new user();
+			u.setfirst_name("Yuda");
+			u.setlast_name("finkel");
+			logger.info("user="+u.toString());
+			
+			SessionFactory sessionFactory=null;
+		/*
+		   	Configuration configuration = new Configuration();
+		   	configuration.configure("hibernate.cfg.xml");
+		   	logger.info("Hibernate Configuration created successfully");
+		    	
+		   	ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+		   	logger.info("ServiceRegistry created successfully");
+		   	sessionFactory = configuration
+					.buildSessionFactory(serviceRegistry);
+		   	logger.info("SessionFactory created successfully");
+	   	
+		   	logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+		   	
+			logger.info(sessionFactory.getStatistics().toString());
+			if (sessionFactory.isClosed() ) {
+				logger.info("sessionFactory.isClosed()");
+			}
+		*/	
+			logger.info("Hibernate Annotation Configuration loaded");
+			//HibernateUtil HibernateUtil= new HibernateUtil();
+			sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+			sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+			sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+			
+			
+			//Get Session
+			Session session = sessionFactory.getCurrentSession();
+			//start transaction
+			logger.info("before save XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+			session.beginTransaction();
+			//Save the Model object
+			user uu = new user();
+			uu.setuser_name("ASDF");
+			uu.setfirst_name("xxxx");
+			uu.setlast_name("aaaa");
+			session.save(uu);
+			//Commit transaction
+			session.getTransaction().commit();
+			logger.info("after save XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+
+			
+			// using Impl 
+			logger.info("checking implement class ...");
+			userImpl user_impl = new userImpl(sessionFactory);
+
+			user u3 = new user();
+			u3.setuser_name("user3");
+			u3.setfirst_name("yuda3");
+			u3.setlast_name("fin3");
+			u3.setphone_number("050-3333333");
+			u3.setemail("abc@333.com");
+			user_impl.addUser(u3);
+						
+			u3.setfirst_name("Yuda_update");	
+			user_impl.updateUser(u3);
+			user_impl.removeUser(u3.getuser_id()-1);
+			
+			logger.info("get all users ...");
+			List<user> userTable = user_impl.listUsers();
+			logger.info("userTable="+ userTable.size());
+			
+			logger.info("getting user object by id ...");
+			user u4 = user_impl.getUserById(u3.getuser_id());
+			logger.info("userTable="+ userTable.size());
+			
+		}
+		catch (Exception e) {
+			logger.warning("error add user !!!");
+			e.printStackTrace();
+		}
+
+
+		
 		InfoMessage message = new InfoMessage(-1, "Error: Getting all users failed.");
 		Gson gson = new Gson();
 		String jsonMessage = gson.toJson(message);

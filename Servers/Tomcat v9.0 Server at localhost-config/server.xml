@@ -41,6 +41,7 @@
 	<Resource 
 	  name="jdbc/MyLocalDB" 
       global="jdbc/MyLocalDB" 
+      factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
       auth="Container" 
       type="javax.sql.DataSource" 
       driverClassName="com.mysql.jdbc.Driver" 

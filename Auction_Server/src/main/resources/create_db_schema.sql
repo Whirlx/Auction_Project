@@ -4,10 +4,13 @@
 
 ********************************************************************/
 
---CREATE USER 'auction_user'@'localhost' IDENTIFIED BY 'auction_user_pw';
-create user if not exists 'auction_user'@'%' IDENTIFIED BY 'auction_user_pw';
 create database if not exists auction_db  CHARACTER SET utf8 COLLATE utf8_bin;
+
+create user if not exists 'auction_user'@'%' IDENTIFIED BY 'auction_user_pw';
 GRANT ALL PRIVILEGES ON auction_db.* TO 'auction_user'@'%';
+FLUSH PRIVILEGES;
+create user if not exists 'auction_user'@'localhost' IDENTIFIED BY 'auction_user_pw';
+GRANT ALL PRIVILEGES ON auction_db.* TO 'auction_user'@'localhost';
 FLUSH PRIVILEGES;
 
 
@@ -51,7 +54,7 @@ COLLATE = utf8_bin
 
 create table items(
 item_id				int NOT NULL AUTO_INCREMENT,			
-item_user_id		int NOT NULL
+item_user_id		int NOT NULL,
 item_category		int NOT NULL,
 item_name			varchar(100),
 item_desc			varchar(1000),
@@ -83,7 +86,7 @@ item_suggest_time 	timestamp(6),
 item_suggest_price	bigint,
 insert_time 	timestamp(6) default current_timestamp(6),
 update_time 	timestamp(6) default current_timestamp(6) on update current_timestamp(6),
-primary key (user_id,item_id,item_suggest_time,),
+primary key (user_id,item_id,item_suggest_time),
 FOREIGN KEY `fkUser` (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 FOREIGN KEY `fkItem` (`item_id`) REFERENCES `items` (`item_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 key item_id (item_id),

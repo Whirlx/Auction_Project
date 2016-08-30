@@ -16,7 +16,7 @@ import javax.persistence.UniqueConstraint;
 @Table(name="users", 
 		   uniqueConstraints={@UniqueConstraint(columnNames={"user_id"})})
 
-public class users {
+public class user {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -116,5 +116,21 @@ public class users {
 	public void setupdate_time(String update_time) {
 		this.update_time= update_time;
 	}	
+	
+	
+	public String toString(){
+		return "User details:{" +
+				" user_id:"   	+ this.getuser_id() + 
+				" user_name:" 	+ this.getuser_name() +
+				" first_name:" 	+ this.getufirst_name() +
+				" last_name:"  	+ this.getlast_name() +
+				" phone_number:"+ this.getphone_number() +
+				" email:"		+ this.getemail() +
+				" last_login_time:" + this.getlast_login_time() +
+				" insert_time:" + this.getinsert_time() +
+				" update_time:" + this.getupdate_time() +
+				"}";
+			
+	}
 	
 } // users
