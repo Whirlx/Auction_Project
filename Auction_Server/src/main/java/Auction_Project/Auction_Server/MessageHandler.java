@@ -70,7 +70,7 @@ public class MessageHandler {
 	// |===========================================|
 	
 	@POST
-	@Path("/register")
+	@Path("/register") // http://localhost:8080/Auction_Server/register
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response registerUser(User inputUser) {
 		if( inputUser == null )
