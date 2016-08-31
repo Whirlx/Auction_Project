@@ -12,6 +12,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Entity
 @Table(name="users", 
 		   uniqueConstraints={@UniqueConstraint(columnNames={"user_id"})})
@@ -26,6 +28,10 @@ public class user {
 
 	@Column(name="user_name", length=100, nullable=true)
 	private String user_name;
+
+	@Column(name="user_pwd", length=100, nullable=true ,insertable=true,updatable=true,columnDefinition=" default 'password'")
+	@ColumnDefault("pwd")
+	private String user_pwd;
 
 	@Column(name="first_name", length=100, nullable=true)
 	private String first_name;
@@ -62,10 +68,19 @@ public class user {
 	public String getuser_name() {
 		return user_name;
 	}
+	
 	public void setuser_name(String user_name) {
 		this.user_name= user_name;
 	}
 
+	public String getuser_pwd() {
+		return user_pwd;
+	}
+
+	public void setuser_pwd(String user_pwd) {
+		this.user_pwd= user_pwd;
+	}
+	
 	public String getufirst_name() {
 		return first_name;
 	}

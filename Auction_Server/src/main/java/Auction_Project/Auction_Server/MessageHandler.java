@@ -157,54 +157,9 @@ public class MessageHandler {
 		//h.getSession();
 		try {
 
-			/*
-			Context initContext = new InitialContext();
-			Context envContext  = (Context)initContext.lookup("java:/comp/env");
-			DataSource ds = (DataSource)envContext.lookup("jdbc/MyLocalDB");
-			Connection conn = ds.getConnection();
-			*/
-			
-					
-			//etc.
-			
-			//getNameInNamespace
-			//Context initContext = new InitialContext();
-			//InitialContext envContext  = initCtx.lookup("java:/comp/env");
-			//SessionFactory sessionFactoryx = (SessionFactory) ((InitialContext) envContext).lookup("jdbc/MyLocalDB");
-
-			//initCtx.lookup("java:comp/env/jdbc/MyLocalDB");
-			//SessionFactory sessionFactoryx = (SessionFactory) initCtx.lookup("java:comp/env/jdbc/MyLocalDB");
-
-			  //Context initContext = new InitialContext();
-	          //  Context envContext  = (Context)initContext.lookup("java:/comp/env");
-	          //  DataSource ds = (DataSource)envContext.lookup("jdbc/slingemp");
-			
 			logger.info("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
-
-			user u = new user();
-			u.setfirst_name("Yuda");
-			u.setlast_name("finkel");
-			logger.info("user="+u.toString());
-			
 			SessionFactory sessionFactory=null;
-		/*
-		   	Configuration configuration = new Configuration();
-		   	configuration.configure("hibernate.cfg.xml");
-		   	logger.info("Hibernate Configuration created successfully");
-		    	
-		   	ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
-		   	logger.info("ServiceRegistry created successfully");
-		   	sessionFactory = configuration
-					.buildSessionFactory(serviceRegistry);
-		   	logger.info("SessionFactory created successfully");
-	   	
-		   	logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-		   	
-			logger.info(sessionFactory.getStatistics().toString());
-			if (sessionFactory.isClosed() ) {
-				logger.info("sessionFactory.isClosed()");
-			}
-		*/	
+
 			logger.info("Hibernate Annotation Configuration loaded");
 			//HibernateUtil HibernateUtil= new HibernateUtil();
 			sessionFactory=HibernateUtil.getSessionAnnotationFactory();

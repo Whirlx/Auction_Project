@@ -19,7 +19,7 @@ use auction_db;
 create table users(
 user_id			int NOT NULL AUTO_INCREMENT,			
 user_name		varchar(100) NOT NULL,
-user_pwd		varchar(100) NOT NULL,
+user_pwd		varchar(100),
 first_name		varchar(100),
 last_name		varchar(100),
 phone_number	varchar(100),

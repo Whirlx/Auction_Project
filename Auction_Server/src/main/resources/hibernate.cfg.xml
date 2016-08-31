@@ -24,6 +24,14 @@
 		<!-- Dialect is required to let Hibernate know the Database Type, MySQL, Oracle etc
 			Hibernate 4 automatically figure out Dialect from Database Connection Metadata -->
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property> 
+		<!-- MySQL5Dialect -->
+
+
+		<property name="hibernate.generate_statistics">true</property>
+		<!--
+		<property name="hibernate.session.events.log">true</property>
+ 		<property name="hibernate.session.events.auto">true</property>
+		-->
 
 		<!-- Mapping with model class containing annotations -->
 		<mapping package="Auction_Project.Auction_Server.hibernate.model"/>
