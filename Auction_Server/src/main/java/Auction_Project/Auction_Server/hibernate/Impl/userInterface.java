@@ -9,6 +9,7 @@ public interface userInterface {
 	public void updateUser(user u);
 	public List<user> listUsers();
 	public user getUserById(int user_id);
+	public user getUserByUserName(String user_name);
 	public void removeUser(int user_id);
 	
 }
