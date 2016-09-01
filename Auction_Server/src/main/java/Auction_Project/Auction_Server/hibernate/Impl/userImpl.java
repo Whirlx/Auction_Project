@@ -66,7 +66,6 @@ public class userImpl implements userInterface {
 
 	@Override
 	public List<user> listUsers() {
-		// TODO Auto-generated method stub
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
 		List<user> usersList = session.createQuery("from user").list();
@@ -79,10 +78,19 @@ public class userImpl implements userInterface {
 
 	@Override
 	public user getUserById(int user_id) {
-		// TODO Auto-generated method stub
 		Session session = this.sessionFactory.getCurrentSession();		
 		Transaction tx = session.beginTransaction();
 		user u = (user) session.load(user.class, new Integer(user_id));
+		logger.info("User loaded successfully, User details="+u.toString());
+		
+		tx.commit();
+		return u;
+	}
+	
+	@Override
+		Session session = this.sessionFactory.getCurrentSession();		
+		Transaction tx = session.beginTransaction();
+		user u = (user) session.load(user.class, new String(user_name));
 		logger.info("User loaded successfully, User details="+u.toString());
 		
 		tx.commit();
@@ -111,7 +119,6 @@ public class userImpl implements userInterface {
 
 	@Override
 	public void removeUser(int user_id) {
-		// TODO Auto-generated method stub
 		logger.info("Going to delete user_id=" +user_id);
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();

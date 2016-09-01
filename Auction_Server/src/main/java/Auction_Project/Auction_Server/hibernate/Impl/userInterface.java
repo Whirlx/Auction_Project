@@ -10,6 +10,7 @@ public interface userInterface {
 	public List<user> listUsers();
 	public user getUserById(int user_id);
 	public user getUserByName(String user_name);
+	public user getUserByuserName(String user_name);
 	public void removeUser(int user_id);
 	
 }
