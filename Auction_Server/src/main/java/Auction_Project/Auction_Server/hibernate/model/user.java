@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name="users", 
@@ -25,7 +26,7 @@ public class user {
 	@Column(name="user_id", nullable=false, unique=true, length=11)
 	private int user_id;
 
-
+	@NaturalId
 	@Column(name="user_name", length=100, nullable=true)
 	private String user_name;
 

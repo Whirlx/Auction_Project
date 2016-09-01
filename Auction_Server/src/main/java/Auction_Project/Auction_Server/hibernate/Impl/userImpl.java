@@ -90,6 +90,26 @@ public class userImpl implements userInterface {
 	}
 
 	@Override
+	public user getUserByName(String user_name) {
+		// TODO Auto-generated method stub
+		Session session = this.sessionFactory.getCurrentSession();		
+		Transaction tx = session.beginTransaction();
+		//user u = (user) session.load(user.class, new Integer(user_id));
+		user u = (user) session.byNaturalId( user.class ).using("user_name",new String(user_name)).load();
+				//.getReference();
+		
+		
+		logger.info("User loaded successfully, User details="+u.toString());
+		
+		
+		
+		
+		
+		tx.commit();
+		return u;
+	}
+
+	@Override
 	public void removeUser(int user_id) {
 		// TODO Auto-generated method stub
 		logger.info("Going to delete user_id=" +user_id);
