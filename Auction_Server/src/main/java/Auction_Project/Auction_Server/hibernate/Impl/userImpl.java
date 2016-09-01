@@ -106,14 +106,7 @@ public class userImpl implements userInterface {
 		//user u = (user) session.load(user.class, new Integer(user_id));
 		user u = (user) session.byNaturalId( user.class ).using("user_name",new String(user_name)).load();
 				//.getReference();
-		
-		
 		logger.info("User loaded successfully, User details="+u.toString());
-		
-		
-		
-		
-		
 		tx.commit();
 		return u;
 	}

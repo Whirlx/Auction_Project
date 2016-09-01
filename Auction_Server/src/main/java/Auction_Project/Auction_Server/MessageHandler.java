@@ -10,6 +10,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -198,6 +199,25 @@ public class MessageHandler
 	// |========================================|
 	// |               Delete User              |
 	// |========================================|
+	
+	@DELETE 
+    @Path("/users/{reqUser}/delete") // Path = http://localhost:8080/Auction_Server/users/x/delete/?username=x&password=x
+    public Response deleteUser(@PathParam("reqUser") String requestedUserName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+	{
+		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+		userImpl user_impl = new userImpl(sessionFactory);
+		user userToAuth = user_impl.getUserByName(userName);
+		if( isAuthentic(userToAuth, password) )
+		{
+			System.out.println("["+userToAuth.getUserName()+"] -> User "+requestedUserName+" Delete");
+			user_impl.removeUser(user_impl.getUserByName(requestedUserName).getUserId());
+			String message = "User "+requestedUserName+" has been successfully deleted.";
+			return Response.status(200).entity(toJsonString(message)).build();
+		}
+		System.out.println("Failed deleting "+requestedUserName);
+		String message = "Error: Deleting user failed because of bad authentication.";
+		return Response.status(400).entity(toJsonString(message)).build();
+    }
 	
 	// |====================================================|
 	// |               View user item auctions              |
