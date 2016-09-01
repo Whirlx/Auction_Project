@@ -84,11 +84,11 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			System.out.println("["+userToAuth.getUserName()+"] -> User "+requestedUserName+" Profile");
-			return Response.status(200).entity(toJsonString(user_impl.getUserByUserName(requestedUserName))).build();
+			return Response.status(200).entity(toJsonString(user_impl.getUserByName(requestedUserName))).build();
 		}
 		System.out.println("Failed getting user profile for user "+userName);
 		String message = "Error: Getting profile failed because of bad authentication.";
@@ -105,7 +105,7 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			System.out.println("["+userToAuth.getUserName()+"] -> View all users");
@@ -209,7 +209,7 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			//if( requestedUserID == userName )
@@ -231,7 +231,7 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			System.out.println("["+mapOfUsers.get(userName).getUserName()+"] -> View Items");
@@ -252,7 +252,7 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			System.out.println("["+mapOfUsers.get(userName).getUserName()+"] -> View Item "+itemID);
@@ -274,7 +274,7 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			mapOfItems.get(itemID).setItemLastBidPrice(price);
@@ -298,7 +298,7 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		user userToAuth = user_impl.getUserByUserName(userName);
+		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			Item newItem = new Item(inputItem);
