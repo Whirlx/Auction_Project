@@ -88,6 +88,7 @@ public class userImpl implements userInterface {
 	}
 	
 	@Override
+	public user getUserByuserName(String user_name) {
 		Session session = this.sessionFactory.getCurrentSession();		
 		Transaction tx = session.beginTransaction();
 		user u = (user) session.load(user.class, new String(user_name));
