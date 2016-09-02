@@ -28,20 +28,18 @@ public class HibernateUtil {
  * 
 /********************************************/
 
-    private static SessionFactory buildSessionAnnotationFactory() {
-    	try {
-    		
+    private static SessionFactory buildSessionAnnotationFactory()
+    {
+    	try 
+    	{
     		logger.info("initial Hibernate sessionFactory ");
-    		
             // Create the SessionFactory from hibernate.cfg.xml
         	Configuration configuration = new Configuration();
         	configuration.configure("hibernate.cfg.xml");
         	logger.info("Hibernate Annotation Configuration loaded");
         	logger.info("configuration" + configuration.toString());
-        	
         	ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
         	logger.info("Hibernate Annotation serviceRegistry created");
-        	
         	SessionFactory sessionFactory = configuration.buildSessionFactory(serviceRegistry);
         	logger.info("Hibernate sessionfactory created");
         	logger.info(sessionFactory.getStatistics().toString());
@@ -62,13 +60,10 @@ public class HibernateUtil {
 		}
 		else{
 			logger.info("SessionFactory already exists !!! ");
-
 		}
 		
 		return sessionAnnotationFactory;
     }
-	
-	
 	
 	public int getSession () {
 		

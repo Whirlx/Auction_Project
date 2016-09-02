@@ -38,6 +38,8 @@
 		<!-- Mapping with model class containing annotations -->
 		<mapping package="Auction_Project.Auction_Server.hibernate.model"/>
 		<mapping class="Auction_Project.Auction_Server.hibernate.model.user"/>
+		<mapping class="Auction_Project.Auction_Server.hibernate.model.item"/>
+		<mapping class="Auction_Project.Auction_Server.hibernate.model.itemCategory"/>
 		
 	</session-factory>
 </hibernate-configuration>
