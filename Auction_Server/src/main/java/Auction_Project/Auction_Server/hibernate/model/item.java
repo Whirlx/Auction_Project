@@ -1,28 +1,66 @@
-package Auction_Project.Auction_Server;
+package Auction_Project.Auction_Server.hibernate.model;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-public class Item {
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hibernate.annotations.NaturalId;
+
+@Entity
+@Table(name="items", uniqueConstraints={@UniqueConstraint(columnNames={"item_id"})})
+public class item {
 	
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Column(name="item_id", nullable=false, unique=true, length=11)
 	private int item_id;
+	
+	@NaturalId
+	@Column(name="item_user_id", length=100, nullable=true)
 	private int item_user_id;
-	private String item_category;
+	
+	@Column(name="item_category", length=100, nullable=true)
+	private int item_category;
+	
+	@NaturalId
+	@Column(name="item_name", length=100, nullable=true)
 	private String item_name;
+	
+	@Column(name="item_desc", length=100, nullable=true)
 	private String item_desc;
+	
+	@Column(name="item_picture", length=100, nullable=true)
 	private int item_picture; // int placeholder type
+	
+	@Column(name="item_start_price", length=100, nullable=true)
 	private int item_start_price;
+	
+	@Column(name="item_last_bid_price", length=100, nullable=true)
 	private int item_last_bid_price;
+	
+	@Column(name="item_last_bid_time", length=100, nullable=true)
 	private String item_last_bid_time;
+	
+	@Column(name="item_last_bid_userid", length=100, nullable=true)
 	private int item_last_bid_userid;
+	
+	@Column(name="insert_time", length=100, nullable=true)
 	private String insert_time;
+	
+	@Column(name="update_time", length=100, nullable=true)
 	private String update_time;
 	
-	public Item() {}
+	public item() {}
 	
-	public Item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, int item_picture, int item_start_price) {
+	public item(int item_id, int item_user_id, int item_category, String item_name, String item_desc, int item_picture, int item_start_price) {
 		this.item_id = item_id;
 		this.item_user_id = item_user_id;
 		this.item_category = item_category;
@@ -38,7 +76,7 @@ public class Item {
 		this.update_time = this.insert_time;
 	}
 	
-	public Item(Item item) {
+	public item(item item) {
     	this.item_id = item.getItemID();
     	this.item_user_id = item.getItemUserId();
     	this.item_category = item.getItemCategory();
@@ -47,12 +85,30 @@ public class Item {
     	this.item_picture = item.getItemPicture();
     	this.item_start_price = item.getItemStartingPrice();
     	this.item_last_bid_price = 0;
-		this.item_last_bid_time = "";
+    	Calendar c = Calendar.getInstance();
+    	this.item_last_bid_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
 		this.item_last_bid_userid = 0;
-		Calendar c = Calendar.getInstance();
-		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
+		this.insert_time = this.item_last_bid_time;
 		this.update_time = this.insert_time;
     }
+	
+	public String toString(){
+		return "\nItem details:{" +
+				" item_id:"   		+ this.getItemID() + 
+				" item_user_id:" 		+ this.getItemUserId() +
+				" item_category:"		+ this.getItemCategory()+
+				" item_name:" 		+ this.getItemName() +
+				" item_desc:"  		+ this.getItemDescription() +
+				" item_picture:"	+ this.getItemPicture() +
+				" item_start_price:"			+ this.getItemStartingPrice() +
+				" item_last_bid_price:" + this.getItemLastBidPrice() +
+				" item_last_bid_time:" 	+ this.getItem_last_bid_time() +
+				" item_last_bid_userid:" 	+ this.getItemUserId() +
+				" insert_time:" 	+ this.getInsert_time() +
+				" update_time:" 	+ this.getUpdate_time() +
+				"}";
+			
+	}
 
 	@JsonProperty("item_id")
 	public int getItemID() {
@@ -73,11 +129,11 @@ public class Item {
 	}
 
 	@JsonProperty("item_category")
-	public String getItemCategory() {
+	public int getItemCategory() {
 		return item_category;
 	}
 
-	public void setItemCategory(String item_category) {
+	public void setItemCategory(int item_category) {
 		this.item_category = item_category;
 	}
 	

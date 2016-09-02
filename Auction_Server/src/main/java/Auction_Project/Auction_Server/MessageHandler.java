@@ -22,9 +22,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import Auction_Project.Auction_Server.hibernate.HibernateUtil;
+import Auction_Project.Auction_Server.hibernate.Impl.itemCategoryImpl;
+import Auction_Project.Auction_Server.hibernate.Impl.itemImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.userImpl;
 import Auction_Project.Auction_Server.hibernate.model.user;
+import Auction_Project.Auction_Server.hibernate.model.item;
+import Auction_Project.Auction_Server.hibernate.model.itemCategory;
+
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
 import org.hibernate.Session;
@@ -38,11 +45,6 @@ import org.hibernate.service.ServiceRegistry;
 @Produces(MediaType.APPLICATION_JSON)
 public class MessageHandler 
 {
-	
-	public static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
-	private static HashMap<String, user> mapOfUsers = new HashMap<String, user>();
-	private static HashMap<Integer, Item> mapOfItems = new HashMap<Integer, Item>();
-	private static int numOfItems = 0;
 	
 	// |=================================================|
 	// |               Server Root Function              |
@@ -117,85 +119,6 @@ public class MessageHandler
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
-	// |============================================|
-	// |               View all users2               |
-	// |============================================|
-	
-	@GET 
-    @Path("/users2") // Path = http://localhost:8080/Auction_Server/users/?id=3&password=123abc
-    public Response getUsers2(@QueryParam("username") String userName, @QueryParam("password") String password) {
-
-		logger.info("get all users using hibernate method ");
-		
-		//helper h= new helper();
-		//h.getSession();
-		try {
-
-			logger.info("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
-			SessionFactory sessionFactory=null;
-
-			logger.info("Hibernate Annotation Configuration loaded");
-			//HibernateUtil HibernateUtil= new HibernateUtil();
-			sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-			sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-			sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-			
-			//Get Session
-			Session session = sessionFactory.getCurrentSession();
-			//start transaction
-			logger.info("before save XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-			session.beginTransaction();
-			//Save the Model object
-			user uu = new user();
-			uu.setUserName("ASDF");
-			uu.setPassword("pwd");
-			uu.setFirstName("xxxx");
-			uu.setLastName("aaaa");
-			session.save(uu);
-			//Commit transaction
-			session.getTransaction().commit();
-			logger.info("after save XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-
-			
-			// using Impl 
-			logger.info("checking implement class ...");
-			userImpl user_impl = new userImpl(sessionFactory);
-
-			user u3 = new user();
-			u3.setUserName("user3");
-			u3.setPassword("pwd");
-			u3.setFirstName("yuda3");
-			u3.setLastName("fin3");
-			u3.setPhoneNumber("050-3333333");
-			u3.setEmail("abc@333.com");
-			user_impl.addUser(u3);
-						
-			u3.setFirstName("Yuda_update");	
-			user_impl.updateUser(u3);
-			user_impl.removeUser(u3.getUserId()-1);
-			
-			logger.info("get all users ...");
-			List<user> userTable = user_impl.listUsers();
-			logger.info("userTable="+ userTable.size());
-			
-			logger.info("getting user object by id ...");
-			user u4 = user_impl.getUserById(u3.getUserId());
-			logger.info("userTable="+ userTable.size());
-			
-		}
-		catch (Exception e) {
-			logger.warning("error add user !!!");
-			e.printStackTrace();
-		}
-
-
-		
-
-		String message = "test";
-		logger.warning("Failed viewing all users for user ID "+userName);
-		return Response.status(400).entity(toJsonString(message)).build();
-    }
-	
 	// |========================================|
 	// |               Delete User              |
 	// |========================================|
@@ -254,8 +177,9 @@ public class MessageHandler
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			System.out.println("["+mapOfUsers.get(userName).getUserName()+"] -> View Items");
-			return Response.status(200).entity(toJsonString(mapOfItems)).build();
+			itemImpl item_impl = new itemImpl(sessionFactory);
+			System.out.println("["+userName+"] -> View Items");
+			return Response.status(200).entity(toJsonString(item_impl.listItems())).build();
 		}
 		System.out.println("Failed getting items for user ID "+userName);
 		String message = "Error: Getting items failed.";
@@ -267,16 +191,20 @@ public class MessageHandler
 	// |=======================================|
 	
 	@GET 
-    @Path("/items/{id}") // Path = http://localhost:8080/Auction_Server/items/y/?username=x&password=x
-    public Response viewItem(@PathParam("id") int itemID, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/items/{item_id}") // Path = http://localhost:8080/Auction_Server/items/y/?username=x&password=x
+    public Response viewItem(@PathParam("item_id") int itemID, @QueryParam("username") String userName, @QueryParam("password") String password) 
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			System.out.println("["+mapOfUsers.get(userName).getUserName()+"] -> View Item "+itemID);
-			return Response.status(200).entity(toJsonString(mapOfItems.get(itemID))).build();
+			itemImpl item_impl = new itemImpl(sessionFactory);
+			System.out.println("["+userName+"] -> View Item "+itemID);
+			GsonBuilder gsonBuilder = new GsonBuilder();
+		    Gson gson = gsonBuilder.registerTypeAdapter(item.class, new itemAdapter()).create();
+			String jsonString = gson.toJson(item_impl.getItemById(itemID));
+			return Response.status(200).entity(jsonString).build();
 		}
 		System.out.println("Failed getting item "+itemID+" for user ID "+userName);
 		String message = "Error: Getting item "+itemID+" failed.";
@@ -290,20 +218,23 @@ public class MessageHandler
 	@PUT 
     @Path("/items/{id}/bid") // Path = http://localhost:8080/Auction_Server/items/y/bid/?username=x&password=x
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response bidItem(int price, @PathParam("id") int itemID, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    public Response bidItem(int price, @PathParam("item_name") String itemName, @QueryParam("username") String userName, @QueryParam("password") String password) 
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			mapOfItems.get(itemID).setItemLastBidPrice(price);
-			String message = "Successfully bid on item "+itemID;
-			System.out.println("["+mapOfUsers.get(userName).getUserName()+"] -> Bid Item "+itemID);
+			itemImpl item_impl = new itemImpl(sessionFactory);
+			item itemToBid = item_impl.getItemByName(itemName);
+			itemToBid.setItemLastBidPrice(price);
+			item_impl.updateItem(itemToBid);
+			String message = "Successfully bid on item "+itemName;
+			System.out.println("["+userName+"] -> Bid Item "+itemName);
 			return Response.status(200).entity(toJsonString(message)).build();
 		}
-		System.out.println("Failed bid on item "+itemID+" by user ID "+userName);
-		String message = "Error: Bid on item "+itemID+" failed.";
+		System.out.println("Failed bid on item "+itemName+" by user ID "+userName);
+		String message = "Error: Bid on item "+itemName+" failed.";
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -314,23 +245,48 @@ public class MessageHandler
 	@POST 
     @Path("/items/add") // Path = http://localhost:8080/Auction_Server/items/add/?username=x&password=x
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response addItem(Item inputItem, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    public Response addItem(item inputItem, @QueryParam("username") String userName, @QueryParam("password") String password) 
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			Item newItem = new Item(inputItem);
-			numOfItems++;
-			newItem.setItemID(numOfItems);
-			mapOfItems.put(numOfItems, newItem);
-			String message = "Item has been successfully added.";
-			System.out.println("["+mapOfUsers.get(userName).getUserName()+"] -> Add item "+inputItem.getItemName());
-			return Response.status(200).entity(toJsonString(message)).build();
+			item newItem = new item(inputItem);
+			itemImpl item_impl = new itemImpl(sessionFactory);
+			item_impl.addItem(newItem);
+			String message = "Item "+newItem.getItemName()+" has been successfully added.";
+			System.out.println("["+newItem.getItemName()+"] has been successfully added to the Auction Server.");
+			return Response.status(201).entity(toJsonString(message)).build();
 		}
 		System.out.println("Failed to add item "+inputItem.getItemName()+" by user ID "+userName);
 		String message = "Error: item add fail.";
+		return Response.status(400).entity(toJsonString(message)).build();
+    }
+	
+	// |===============================================|
+	// |               Add item category               |
+	// |===============================================|
+	
+	@POST 
+    @Path("/items/category/add") // Path = http://localhost:8080/Auction_Server/items/category/add/?username=x&password=x
+	@Consumes(MediaType.APPLICATION_JSON)
+    public Response addItemCategory(itemCategory inputItemCategory, @QueryParam("username") String userName, @QueryParam("password") String password) 
+	{
+		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+		userImpl user_impl = new userImpl(sessionFactory);
+		user userToAuth = user_impl.getUserByName(userName);
+		if( isAuthentic(userToAuth, password) )
+		{
+			itemCategory newItemCategory = new itemCategory(inputItemCategory);
+			itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+			item_category_impl.addItemCategory(newItemCategory);
+			String message = "Item category "+newItemCategory.getItemCategoryName()+" has been successfully added.";
+			System.out.println("["+newItemCategory.getItemCategoryName()+"] has been successfully added to the Auction Server.");
+			return Response.status(201).entity(toJsonString(message)).build();
+		}
+		System.out.println("Failed to add item category "+inputItemCategory.getItemCategoryName()+" by user ID "+userName);
+		String message = "Error: item category add fail.";
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	

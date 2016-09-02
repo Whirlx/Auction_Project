@@ -2,38 +2,38 @@ package Auction_Project.Auction_Server.hibernate.Impl;
 
 import java.util.List;
 import java.util.logging.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import Auction_Project.Auction_Server.hibernate.model.user;
+import Auction_Project.Auction_Server.hibernate.model.item;
 
-public class userImpl implements userInterface {
+public class itemImpl implements itemInterface 
+{
 	public static final Logger logger = Logger.getLogger(userImpl.class.getName());
 	private SessionFactory sessionFactory;
 
-	public userImpl(SessionFactory sf)
+	public itemImpl(SessionFactory sf)
 	{
 		if (sf !=null)
 		{
 			this.setSessionFactory(sf);
-			logger.info("hibernate session factory was set on userImpl");
+			logger.info("hibernate session factory was set on itemImpl");
 			logger.info(sf.getStatistics().toString());
-			if (sf.isClosed() ) {
+			if (sf.isClosed() ) 
+			{
 				logger.info("sf.isClosed()");
 			}
-			else {
+			else 
+			{
 			sf.openSession();
 			logger.info(sf.getStatistics().toString());
-				
 			}
 		}
 		else
 		{
 			logger.info("hibernate session factory need to be initail with contructor ");
 		}
-		
 	}
 	
 	public void setSessionFactory(SessionFactory sf){
@@ -41,82 +41,80 @@ public class userImpl implements userInterface {
 	}
 
 	@Override
-	public void addUser(user u) {
-		// TODO Auto-generated method stub
-		logger.info("Going to add new user to database "+u.toString());
+	public void addItem(item item) {
+		logger.info("Going to add new item to database "+item.toString());
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
 		//session.persist(u);
-		session.save(u);
+		session.save(item);
 		tx.commit();
-		logger.info("User saved successfully, user Details="+u.toString());
+		logger.info("Item saved successfully, item Details="+item.toString());
 	}
 
 	@Override
-	public void updateUser(user u) {
-		// TODO Auto-generated method stub
-		logger.info("Going to update user on database "+u.toString());
+	public void updateItem(item item) {
+		logger.info("Going to update item on database "+item.toString());
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
-		session.update(u);
+		session.update(item);
 		tx.commit();
-		logger.info("User update successfully, user Details="+u.toString());
+		logger.info("Item update successfully, user Details="+item.toString());
 
 	}
 
 	@Override
-	public List<user> listUsers() {
+	public List<item> listItems() {
+		System.out.println("111");
 		Session session = this.sessionFactory.getCurrentSession();
+		System.out.println("222");
 		Transaction tx = session.beginTransaction();
-		List<user> usersList = session.createQuery("from user").list();
-		for(user u : usersList){
-			logger.info("user List::"+u.toString());
+		System.out.println("333");
+		List<item> itemsList = session.createQuery("from item").list();
+		System.out.println("444");
+		for(item u : itemsList)
+		{
+			logger.info("item List::"+u.toString());
 		}
 		tx.commit();
-		return usersList;
+		return itemsList;
 	}
 
 	@Override
-	public user getUserById(int user_id) {
+	public item getItemById(int item_id) {
 		Session session = this.sessionFactory.getCurrentSession();		
 		Transaction tx = session.beginTransaction();
-		user u = (user) session.load(user.class, new Integer(user_id));
-		logger.info("User loaded successfully, User details="+u.toString());
-		
+		item item = (item) session.load(item.class, new Integer(item_id));
+		logger.info("Item loaded successfully, Item details="+item.toString());
 		tx.commit();
-		return u;
+		return item;
 	}
 
 	@Override
-	public user getUserByName(String user_name) {
-		// TODO Auto-generated method stub
+	public item getItemByName(String item_name) {
 		Session session = this.sessionFactory.getCurrentSession();		
 		Transaction tx = session.beginTransaction();
 		//user u = (user) session.load(user.class, new Integer(user_id));
-		user u = (user) session.byNaturalId( user.class ).using("user_name",new String(user_name)).load();
+		item item = (item) session.byNaturalId( item.class ).using("item_name",new String(item_name)).load();
 				//.getReference();
-		logger.info("User loaded successfully, User details="+u.toString());
+		logger.info("Item loaded successfully, Item details="+item.toString());
 		tx.commit();
-		return u;
+		return item;
 	}
 
 	@Override
-	public void removeUser(int user_id) {
-		logger.info("Going to delete user_id=" +user_id);
+	public void removeItem(int item_id) {
+		logger.info("Going to delete item_id=" +item_id);
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
-
-		user u = (user) session.load(user.class, new Integer(user_id));
-		if (null != u ) {
-			logger.info("delete user "+ u.toString());
-			session.delete(u);
+		item item = (item) session.load(item.class, new Integer(item_id));
+		if (null != item ) {
+			logger.info("delete item "+ item.toString());
+			session.delete(item);
 		}
-
 		//Transaction tx = session.beginTransaction();
 		tx.commit();
-		logger.info("User delete successfully, user_id="+user_id);
-		
+		logger.info("Item delete successfully, item_id="+item_id);
 	}
 
 	
-} //userImpl
+} //itemImpl
