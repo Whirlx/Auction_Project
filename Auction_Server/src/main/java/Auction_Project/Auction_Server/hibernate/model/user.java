@@ -22,14 +22,9 @@ public class user {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="user_id", nullable=false, unique=true, length=11)
-<<<<<<< HEAD
 	private int user_id;
 
 	@NaturalId
-=======
-    private int user_id;
-	
->>>>>>> 699917be53ad3278e8adc1236bef4c175ef5da55
 	@Column(name="user_name", length=100, nullable=true)
     private String user_name;
 	
