@@ -79,26 +79,28 @@ DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_bin
 ;
 
-create table auction_trxs(
+
+create table auction_bid_transactions(
+auc_bid_trx_id		int NOT NULL AUTO_INCREMENT,
 user_id				int NOT NULL,
 item_id				int NOT NULL,
-item_suggest_time 	timestamp(6),
-item_suggest_price	bigint,
+item_bid_time 	timestamp(6),
+item_bid_price	bigint,
 insert_time 	timestamp(6) default current_timestamp(6),
 update_time 	timestamp(6) default current_timestamp(6) on update current_timestamp(6),
-primary key (user_id,item_id,item_suggest_time),
+primary key (auc_bid_trx_id),
 FOREIGN KEY `fkUser` (`user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 FOREIGN KEY `fkItem` (`item_id`) REFERENCES `items` (`item_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+key unique_key(user_id,item_id,item_bid_time,item_bid_price),
 key item_id (item_id),
-key item_suggest_time (item_suggest_time),
-key item_suggest_price (item_suggest_price),
+key item_bid_time (item_bid_time),
+key item_bid_price (item_bid_price),
 key insert_time (insert_time)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_bin
 ;
-
 
 -- insert new data
 insert into users(user_id,user_name,user_pwd,first_name,last_name)
