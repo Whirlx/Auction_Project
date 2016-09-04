@@ -98,3 +98,8 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8
 COLLATE = utf8_bin
 ;
+
+
+-- insert new data
+insert into users(user_id,user_name,user_pwd,first_name,last_name)
+	values (0,"Admin","Admin","Administrator","Administrator");
