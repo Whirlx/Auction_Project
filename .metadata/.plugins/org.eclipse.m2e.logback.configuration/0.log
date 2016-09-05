@@ -4762,3 +4762,18 @@
 2016-08-28 18:48:47,256 [Worker-44] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of Auction_Server
 2016-08-28 18:48:47,256 [Worker-44] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for Auction_Server
 2016-08-28 18:48:47,260 [Worker-44] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-09-05 10:13:17,749 [Worker-11] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.maven.ide.eclipse.wtp.WarLifecycleMapping lifecycle mapping for MavenProject: Auction_Project:Auction_Server:0.0.1-SNAPSHOT @ C:\apps\GitHub\Auction_Project\Auction_Server\pom.xml.
+2016-09-05 10:13:24,760 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1255 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-09-05 10:13:24,876 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 3 resources
+2016-09-05 10:13:24,887 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1255 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-09-05 10:13:24,926 [Worker-11] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\apps\GitHub\Auction_Project\Auction_Server\src\test\resources
+2016-09-05 10:13:24,932 [Worker-11] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of Auction_Server
+2016-09-05 10:13:24,933 [Worker-11] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for Auction_Server
+2016-09-05 10:13:24,953 [Worker-11] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1255 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-09-05 10:13:32,027 [Worker-15] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1255 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-09-05 10:13:32,048 [Worker-15] INFO  o.e.m.c.i.embedder.EclipseLogger - Copying 3 resources
+2016-09-05 10:13:32,227 [Worker-15] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1255 actually) to copy filtered resources, i.e. build is platform dependent!
+2016-09-05 10:13:32,256 [Worker-15] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory C:\apps\GitHub\Auction_Project\Auction_Server\src\test\resources
+2016-09-05 10:13:32,256 [Worker-15] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Changed resources require a complete clean of filtered resources of Auction_Server
+2016-09-05 10:13:32,256 [Worker-15] INFO  o.e.m.w.i.f.ResourceFilteringBuildParticipant - Executing resource filtering for Auction_Server
+2016-09-05 10:13:32,275 [Worker-15] WARN  o.e.m.c.i.embedder.EclipseLogger - Using platform encoding (Cp1255 actually) to copy filtered resources, i.e. build is platform dependent!
