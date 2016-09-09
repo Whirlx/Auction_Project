@@ -4,6 +4,7 @@
 
 ********************************************************************/
 
+drop database if exists auction_db;
 create database if not exists auction_db  CHARACTER SET utf8 COLLATE utf8_bin;
 
 create user if not exists 'auction_user'@'%' IDENTIFIED BY 'auction_user_pw';
@@ -107,3 +108,6 @@ COLLATE = utf8_bin
 SET session SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 insert into users(user_id,user_name,user_pwd,first_name,last_name)
 	values (0,"Admin","Admin","Administrator","Administrator");
+
+insert into item_categories(item_category_id,item_category_name)
+	values (0,"default-categories");
