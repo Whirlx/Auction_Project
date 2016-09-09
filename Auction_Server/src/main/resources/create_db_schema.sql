@@ -28,7 +28,7 @@ last_login_time timestamp(6) default current_timestamp(6) on update current_time
 insert_time 	timestamp(6) default current_timestamp(6),
 update_time 	timestamp(6) default current_timestamp(6) on update current_timestamp(6),
 primary key (user_id),
-key user_name (user_name),
+unique key user_name (user_name),
 key insert_time (insert_time)
 )
 ENGINE = InnoDB
@@ -43,7 +43,7 @@ item_category_name 	varchar(1000) NOT NULL,
 insert_time 	timestamp(6) default current_timestamp(6),
 update_time 	timestamp(6) default current_timestamp(6) on update current_timestamp(6),
 primary key (item_category_id),
-key item_category_name (item_category_name),
+unique key item_category_name (item_category_name),
 key insert_time (insert_time)
 )
 ENGINE = InnoDB
@@ -69,6 +69,7 @@ primary key (item_id),
 FOREIGN KEY `fkCategory` (`item_category`) REFERENCES `item_categories` (`item_category_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 FOREIGN KEY `fkUserid` (`item_user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 key item_category (item_category),
+unique key item_name  (item_name),
 key item_last_bid_price (item_last_bid_price),
 key item_last_bid_time (item_last_bid_time),
 key item_last_bid_userid (item_last_bid_userid),
@@ -103,5 +104,6 @@ COLLATE = utf8_bin
 ;
 
 -- insert new data
+SET session SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 insert into users(user_id,user_name,user_pwd,first_name,last_name)
 	values (0,"Admin","Admin","Administrator","Administrator");
