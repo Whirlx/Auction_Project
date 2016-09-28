@@ -14,7 +14,14 @@ import android.widget.ListAdapter;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+
+import java.util.ArrayList;
+
 public class ListOfSearchActivity extends AppCompatActivity {
+    private ArrayList<AuctionInfo> searchedAuctionsInfoAL;
+    private ArrayList<ItemInfo> searchResultsAL = new ArrayList<ItemInfo>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +31,38 @@ public class ListOfSearchActivity extends AppCompatActivity {
         if (itemData == null)
             return;
         String itemString = itemData.getString("searcheditem");
+        invokeSearchingRequest(itemString);
+        // send searched item to server and receive many item objects.
+        /*
+        searchedAuctionsInfoAL = new ArrayList<AuctionInfo>();
+        ArrayList<String> displayAuctionInfoAL = new ArrayList<String>();
+        for (int i = 0; i < searchedAuctionsInfoAL.size(); i++){
+            displayAuctionInfoAL.add("Item ID: " + searchedAuctionsInfoAL.get(i).getItemId() + "   Item Name: " + searchedAuctionsInfoAL.get(i).getItemName() +
+                    "   Current Bid: " + searchedAuctionsInfoAL.get(i).getLastBidPrice() + "   Remaining Time: " + searchedAuctionsInfoAL.get(i).getRemainingAuctionTime()
+                    + "   Bid Made By: ");
+        }
+
+        String[] auctionInfosToDisplay = new String[displayAuctionInfoAL.size()];
+        auctionInfosToDisplay = displayAuctionInfoAL.toArray(auctionInfosToDisplay);
+        ListAdapter auctionsInfoAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, auctionInfosToDisplay);
+        ListView searchedAuctionsListView = (ListView) findViewById(R.id.listViewId);
+        searchedAuctionsListView.setAdapter(auctionsInfoAdapter);
+
+
+        searchedAuctionsListView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener(){
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        AuctionInfo itemChosen = searchedAuctionsInfoAL.get(position);
+                        String currentBid = itemChosen.getLastBidPrice();
+                        String itemId = itemChosen.getItemId();
+                        newBid(currentBid, itemId);
+                    }
+                }
+        );
+
+
+        */
         String[] items = {"Item ID: " + itemString + "   Current Bid: 50$   Time Left: 7 hours",
                 "Item ID: " + itemString + "   Current Bid: 43$   Time Left: 7 hours   Picture:",
                 "Item ID: " + itemString + "   Current Bid: 41$   Time Left: 4 hours   Picture:",
@@ -45,5 +84,38 @@ public class ListOfSearchActivity extends AppCompatActivity {
             }
         );
 
+    }
+
+    public void invokeSearchingRequest(String itemName)
+    {
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get("http://localhost:8080/Auction_Server/TO-BE-DETERMINED/?itemName = ITEMNAME", new AsyncHttpResponseHandler() { // need to add the json to the send request
+
+            // When the response returned by REST has Http response code '200'
+            @Override
+            public void onSuccess(String response) {
+                // parse json response into itemInfo objects and insert them to an arrayList
+                searchResultsAL.add(null);
+                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+
+            }
+
+
+
+            @Override
+            public void onFailure(Throwable e) {
+                Toast.makeText(getApplicationContext(), "Item not found.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+
+    public void newBid (String currentBid, String itemId)
+    {
+        Intent i = new Intent (this, PlaceNewBidActivity.class);
+        i.putExtra ("currentbid", currentBid);
+        i.putExtra ("itemid", itemId);
+        startActivity(i);
     }
 }

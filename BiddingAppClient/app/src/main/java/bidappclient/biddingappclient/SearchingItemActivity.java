@@ -1,5 +1,4 @@
 package bidappclient.biddingappclient;
-
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,10 +7,8 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-
 import com.google.gson.Gson;
 import java.io.IOException;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -45,20 +42,8 @@ public class SearchingItemActivity extends AppCompatActivity {
 
 
     public void sendSearchToServer(String itemName) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
 
-        try {
-            ItemInfo meh = new ItemInfo ("blergh", 50, 5, "very good blergh");
-            HttpPost request = new HttpPost("our server ip");
-            Gson gson = new Gson();
-            StringEntity params = new StringEntity(gson.toJson(meh));
-            request.addHeader("content-type", "application/x-www-form-urlencoded");
-            request.setEntity(params);
-            HttpResponse response = httpClient.execute(request);
-
-            // handle response here...
-        } catch (Exception ex) {} finally {}}
-
+    }
 }
     /*
     public void sendSearchToServer(String itemName) {
@@ -72,6 +57,23 @@ public class SearchingItemActivity extends AppCompatActivity {
         post.setHeader("Content-type", "application/json");
         HttpResponse response = httpClient.execute(post);
     }
+
+
+
+    HttpClient httpClient = HttpClientBuilder.create().build();
+
+        try {
+            ItemInfo meh = new ItemInfo ("blergh", 50, 5, "very good blergh");
+            HttpPost request = new HttpPost("our server ip");
+            Gson gson = new Gson();
+            StringEntity params = new StringEntity(gson.toJson(meh));
+            request.addHeader("content-type", "application/x-www-form-urlencoded");
+            request.setEntity(params);
+            HttpResponse response = httpClient.execute(request);
+
+            // handle response here...
+        } catch (Exception ex) {} finally {}}
+
     */
 
 //}

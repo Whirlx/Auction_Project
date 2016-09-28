@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="bidappclient.biddingappclient">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,7 +23,12 @@
         <activity android:name=".SearchingItemActivity" />
         <activity android:name=".ListOfSearchActivity" />
         <activity android:name=".AddItemActivity" />
-        <activity android:name=".CurrentBidsActivity"></activity>
+        <activity android:name=".CurrentBidsActivity" />
+        <activity android:name=".ViewProfileActivity" />
+        <activity android:name=".ViewCurrentAuctionsActivity" />
+        <activity android:name=".ViewAllUsersActivity" />
+        <activity android:name=".RegisterActivity" />
+        <activity android:name=".PlaceNewBidActivity"></activity>
     </application>
 
 </manifest>

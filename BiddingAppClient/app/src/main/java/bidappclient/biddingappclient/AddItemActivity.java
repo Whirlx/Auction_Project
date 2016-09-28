@@ -30,9 +30,11 @@ public class AddItemActivity extends AppCompatActivity {
         String lastingBidString = lastingBidView.getText().toString();
         TextView descriptionView = (TextView) findViewById(R.id.descriptionAddId);
         String descriptionString = descriptionView.getText().toString();
-        String summary = "Your item name is: " + itemNameString + ", your initial price is " + initialPriceString +", your bid will last: " + lastingBidString +", and your description for the item is: " + descriptionString +".";
-        Toast.makeText(AddItemActivity.this, summary, Toast.LENGTH_LONG).show();
-        ItemInfo item = new ItemInfo (itemNameString, Integer.parseInt(initialPriceString), Integer.parseInt(lastingBidString), descriptionString);
+        TextView categoryView = (TextView) findViewById(R.id.AddItemCategoryId);
+        String categoryString = categoryView.getText().toString();
+        //String summary = "Your item name is: " + itemNameString + ", your initial price is " + initialPriceString +", your bid will last: " + lastingBidString +", and your description for the item is: " + descriptionString +".";
+        //Toast.makeText(AddItemActivity.this, summary, Toast.LENGTH_LONG).show();
+        ItemInfo item = new ItemInfo (categoryString, itemNameString, descriptionString, Integer.parseInt(initialPriceString), Integer.parseInt(lastingBidString));
         //send info to server to store;
     }
 }

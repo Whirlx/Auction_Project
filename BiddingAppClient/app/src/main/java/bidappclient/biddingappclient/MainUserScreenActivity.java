@@ -18,9 +18,10 @@ public class MainUserScreenActivity extends AppCompatActivity {
         Bundle usernameData = getIntent().getExtras();
         if (usernameData == null)
             return;
-        String usernameString = usernameData.getString("username");
+        String firstName = usernameData.getString("firstname");
+        String lastName = usernameData.getString("lastname");
         final TextView helloText = (TextView) findViewById(R.id.helloTextView);
-        helloText.setText("Hello " + usernameString);
+        helloText.setText("Welcome " + firstName + " " + lastName + ".");
     }
 
 
@@ -34,9 +35,26 @@ public class MainUserScreenActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    public void onClickCurrentBids (View view)
-    {
+    public void onClickCurrentBids (View view) {
         Intent i = new Intent (this, CurrentBidsActivity.class);
         startActivity(i);
     }
+
+    public void onClickViewProfile (View view){
+        Intent i = new Intent (this, ViewProfileActivity.class);
+        startActivity(i);
+    }
+
+    public void onClickViewCurrentAuctions (View view){
+        Intent i = new Intent (this, ViewCurrentAuctionsActivity.class);
+        startActivity(i);
+    }
+
+    public void onClickViewAllUsers (View view) {
+        Intent i = new Intent (this, ViewAllUsersActivity.class);
+        startActivity(i);
+    }
+
+
+
 }
