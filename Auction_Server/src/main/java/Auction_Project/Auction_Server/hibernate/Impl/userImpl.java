@@ -42,7 +42,6 @@ public class userImpl implements userInterface {
 
 	@Override
 	public void addUser(user u) {
-		// TODO Auto-generated method stub
 		logger.info("Going to add new user to database "+u.toString());
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
@@ -54,7 +53,6 @@ public class userImpl implements userInterface {
 
 	@Override
 	public void updateUser(user u) {
-		// TODO Auto-generated method stub
 		logger.info("Going to update user on database "+u.toString());
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
@@ -89,13 +87,12 @@ public class userImpl implements userInterface {
 
 	@Override
 	public user getUserByName(String user_name) {
-		// TODO Auto-generated method stub
 		Session session = this.sessionFactory.getCurrentSession();		
 		Transaction tx = session.beginTransaction();
 		//user u = (user) session.load(user.class, new Integer(user_id));
 		user u = (user) session.byNaturalId( user.class ).using("user_name",new String(user_name)).load();
 				//.getReference();
-		logger.info("User loaded successfully, User details="+u.toString());
+		//logger.info("User loaded successfully, User details="+u.toString());
 		tx.commit();
 		return u;
 	}

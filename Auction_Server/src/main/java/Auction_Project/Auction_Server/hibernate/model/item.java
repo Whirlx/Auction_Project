@@ -23,12 +23,11 @@ public class item {
 	@Column(name="item_id", nullable=false, unique=true, length=11)
 	private int item_id;
 	
-	@NaturalId
 	@Column(name="item_user_id", length=100, nullable=true)
 	private int item_user_id;
 	
 	@Column(name="item_category", length=100, nullable=true)
-	private int item_category;
+	private String item_category;
 	
 	@NaturalId
 	@Column(name="item_name", length=100, nullable=true)
@@ -60,7 +59,7 @@ public class item {
 	
 	public item() {}
 	
-	public item(int item_id, int item_user_id, int item_category, String item_name, String item_desc, int item_picture, int item_start_price) {
+	public item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, int item_picture, int item_start_price) {
 		this.item_id = item_id;
 		this.item_user_id = item_user_id;
 		this.item_category = item_category;
@@ -129,11 +128,11 @@ public class item {
 	}
 
 	@JsonProperty("item_category")
-	public int getItemCategory() {
+	public String getItemCategory() {
 		return item_category;
 	}
 
-	public void setItemCategory(int item_category) {
+	public void setItemCategory(String item_category) {
 		this.item_category = item_category;
 	}
 	

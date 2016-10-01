@@ -64,13 +64,22 @@ public class itemImpl implements itemInterface
 
 	@Override
 	public List<item> listItems() {
-		System.out.println("111");
 		Session session = this.sessionFactory.getCurrentSession();
-		System.out.println("222");
 		Transaction tx = session.beginTransaction();
-		System.out.println("333");
 		List<item> itemsList = session.createQuery("from item").list();
-		System.out.println("444");
+		for(item u : itemsList)
+		{
+			logger.info("item List::"+u.toString());
+		}
+		tx.commit();
+		return itemsList;
+	}
+	
+	@Override
+	public List<item> listItemsForUserId(int user_id) {
+		Session session = this.sessionFactory.getCurrentSession();
+		Transaction tx = session.beginTransaction();
+		List<item> itemsList = session.createQuery("from item where item_user_id = "+user_id).list();
 		for(item u : itemsList)
 		{
 			logger.info("item List::"+u.toString());

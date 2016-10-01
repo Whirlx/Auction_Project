@@ -64,13 +64,9 @@ public class itemCategoryImpl implements itemCategoryInterface
 
 	@Override
 	public List<itemCategory> listItemCategories() {
-		System.out.println("111");
 		Session session = this.sessionFactory.getCurrentSession();
-		System.out.println("222");
 		Transaction tx = session.beginTransaction();
-		System.out.println("333");
 		List<itemCategory> itemsList = session.createQuery("from itemCategory").list();
-		System.out.println("444");
 		for(itemCategory u : itemsList)
 		{
 			logger.info("item List::"+u.toString());
@@ -84,7 +80,7 @@ public class itemCategoryImpl implements itemCategoryInterface
 		Session session = this.sessionFactory.getCurrentSession();		
 		Transaction tx = session.beginTransaction();
 		itemCategory itemCategory = (itemCategory) session.load(itemCategory.class, new Integer(item_category_id));
-		logger.info("Item loaded successfully, Item details="+itemCategory.toString());
+		//logger.info("Item loaded successfully, Item details="+itemCategory.toString());
 		tx.commit();
 		return itemCategory;
 	}
@@ -96,7 +92,7 @@ public class itemCategoryImpl implements itemCategoryInterface
 		//user u = (user) session.load(user.class, new Integer(user_id));
 		itemCategory item = (itemCategory) session.byNaturalId( itemCategory.class ).using("item_category_name",new String(item_category_name)).load();
 				//.getReference();
-		logger.info("Item loaded successfully, Item details="+item.toString());
+		//logger.info("Item loaded successfully, Item details="+item.toString());
 		tx.commit();
 		return item;
 	}
