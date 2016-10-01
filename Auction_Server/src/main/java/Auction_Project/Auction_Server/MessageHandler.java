@@ -41,21 +41,26 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+import sun.misc.BASE64Decoder;
+
 @Path("/") // Full path is: http://localhost:8080/Auction_Server/
 @Produces(MediaType.APPLICATION_JSON)
 public class MessageHandler 
 {
 	public static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
 	
+	@Context
+	private HttpServletRequest request;
+	
 	// |=================================================|
 	// |               Server Root Function              |
 	// |=================================================|
 	
 	@GET
-    public Response openingMessage(@Context HttpServletRequest request)  // Opening message when entering the server
+    public Response openingMessage()  // Opening message when entering the server
 	{
 		String userIP = request.getRemoteAddr();
-		logger.info("[User with IP: "+userIP+"] has entered the server lobby.");
+		logger.info("[Guest @ "+userIP+"] has entered the server lobby.");
 		String message = "Welcome to the Auction Server!";	
 		return Response.status(200).entity(toJsonString(message)).build();
     }
@@ -69,6 +74,7 @@ public class MessageHandler
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response registerUser(user inputUser) 
 	{
+		String userIP = request.getRemoteAddr();
 		user newUser = new user(inputUser);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
@@ -76,16 +82,15 @@ public class MessageHandler
 		if( user_impl.getUserByName(newUser.getUserName()) == null)
 		{
 			user_impl.addUser(newUser);
-			message = "User "+newUser.getUserName()+" has been successfully registered.";
-			logger.info("["+inputUser.getUserName()+"] has successfully registered to the Auction Server.");
+			message = "["+newUser.getUserName()+" @ "+userIP+"]->[Register]: Success.";
+			logger.info(message);
 		}
 		else
 		{
-			message = "User "+newUser.getUserName()+" registration failed because username is taken.";
-			logger.info("["+inputUser.getUserName()+"] has failed to register to the Auction Server because username is taken.");
+			message = "["+newUser.getUserName()+" @ "+userIP+"]->[Register]: Failure, username is already taken.";
+			logger.info(message);
 		}
-		
-		return Response.status(201).entity(toJsonString(message)).build();
+		return Response.status(200).entity(toJsonString(message)).build();
 	}
 	
 	// |===============================================|
@@ -93,30 +98,42 @@ public class MessageHandler
 	// |===============================================|
 	
 	@GET 
-    @Path("/users/{reqUser}") // Path = http://localhost:8080/Auction_Server/users/Admin/?username=Admin&password=Admin
-    public Response userProfile(@PathParam("reqUser") String requestedUserName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/users/{reqUser}") // Path = http://localhost:8080/Auction_Server/users/Admin
+    public Response userProfile(@PathParam("reqUser") String requestedUserName) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			logger.info("["+userToAuth.getUserName()+"] -> User "+requestedUserName+" Profile");
 			user requestedUser = user_impl.getUserByName(requestedUserName);
 			if(requestedUser != null)
 			{
+				message = "["+userName+" @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Success.";
+				logger.info(message);
 				return Response.status(200).entity(toJsonString(requestedUser)).build(); // Success
 			}
 			else
 			{
-				logger.warning("Failed getting user profile for user "+userName+" because of bad requested user.");
-				String message = "Error: Getting profile failed because of bad requested user.";
-				return Response.status(400).entity(toJsonString(message)).build(); // Bad requested User
+				message = "["+userName+" @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Failure, no such username.";
+				logger.warning(message);
+				return Response.status(400).entity(toJsonString(message)).build(); // Failure
 			}
 		}
-		logger.warning("Failed getting user profile for user "+userName+" because of bad authentication.");
-		String message = "Error: Getting profile failed because of bad authentication.";
-		return Response.status(400).entity(toJsonString(message)).build(); // Bad authentication
+		message = "["+userName+" @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Failure, incorrect username/password.";
+		logger.warning(message);
+		return Response.status(400).entity(toJsonString(message)).build(); // Failure
     }
 	
 	// |============================================|
@@ -124,19 +141,31 @@ public class MessageHandler
 	// |============================================|
 	
 	@GET 
-    @Path("/users") // Path = http://localhost:8080/Auction_Server/users/?username=Admin&password=Admin
-    public Response getUsers(@QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/users") // Path = http://localhost:8080/Auction_Server/users
+    public Response getUsers() 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View all users]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			logger.info("["+userToAuth.getUserName()+"] -> View all users");
+			message = "["+userName+" @ "+userIP+"]->[View all users]: Success.";
+			logger.info(message);
 			return Response.status(200).entity(toJsonString(user_impl.listUsers())).build();
 		}
-		logger.warning("Failed viewing all users for user ID "+userName);
-		String message = "Error: Getting all users failed.";
+		message = "["+userName+" @ "+userIP+"]->[View all users]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -145,33 +174,41 @@ public class MessageHandler
 	// |========================================|
 	
 	@DELETE 
-    @Path("/users/{reqUser}/delete") // Path = http://localhost:8080/Auction_Server/users/Admin/delete/?username=Admin&password=Admin
-    public Response deleteUser(@PathParam("reqUser") String requestedUserName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/users/{reqUser}/delete") // Path = http://localhost:8080/Auction_Server/users/Admin/delete
+    public Response deleteUser(@PathParam("reqUser") String requestedUserName) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		String message;
-		
 		if( isAuthentic(userToAuth, password) )
 		{
-			
 			if( user_impl.getUserByName(requestedUserName) != null)
 			{
 				user_impl.removeUser(user_impl.getUserByName(requestedUserName).getUserId());
-				logger.info("["+userToAuth.getUserName()+"] -> User "+requestedUserName+" Delete");
-				message = "User "+requestedUserName+" has been successfully deleted.";
+				message = "["+userName+" @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Success.";
+				logger.info(message);
 			}
 			else
 			{
-				logger.info("["+userToAuth.getUserName()+"] -> User "+requestedUserName+" wasn't deleted because username doesn't exist.");
-				message = "User "+requestedUserName+" wasn't deleted because username doesn't exist.";
+				message = "["+userName+" @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Failure, username doesn't exist.";
+				logger.info(message);
 			}
 			
 			return Response.status(200).entity(toJsonString(message)).build();
 		}
-		logger.warning("Failed deleting "+requestedUserName);
-		message = "Error: Deleting user failed because of bad authentication.";
+		message = "["+userName+" @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -185,17 +222,14 @@ public class MessageHandler
 	{
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		System.out.println("@@@@@@@@1111111");
 		System.out.println("Username: "+userName);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			System.out.println("@@@@@@@@2222222");
 			itemImpl item_impl = new itemImpl(sessionFactory);
 			user requestedUser = user_impl.getUserByName(requestedUserName);
 			if(requestedUser != null)
 			{
-				System.out.println("@@@@@@@@333333333");
 				logger.info("["+userName+"] -> User "+requestedUserName+" view auctions.");
 				return Response.status(200).entity(toJsonString(item_impl.listItemsForUserId(requestedUser.getUserId()))).build(); // Success
 			}
@@ -470,6 +504,28 @@ public class MessageHandler
 		return false;
 	}
 	
+	private String decodeHeader() 
+	{
+		String decodedHeader;
+		try 
+		{
+			// Get the Authorisation Header from Request
+			String header = request.getHeader("authorization");
+			    
+			// Header is in the format "Basic 3nc0dedDat4"
+			// We need to extract data before decoding it back to original string
+			String data = header.substring(header.indexOf(" ") +1 );
+			    
+			// Decode the data back to original string
+			byte[] bytes = new BASE64Decoder().decodeBuffer(data);
+			decodedHeader = new String(bytes); 
+		}
+		catch(Exception e)
+		{
+			decodedHeader = null;
+		}
+		return decodedHeader;
+	}
 }
 	
 

@@ -17,15 +17,12 @@ import org.hibernate.type.TimestampType;
 
 @Entity
 @Table(name="auction_bid_transactions", uniqueConstraints={@UniqueConstraint(columnNames={"user_id"})})
-	
-
 public class auctionBidTransactions {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="auc_bid_trx_id", nullable=false, unique=true, length=11)
 	private int auc_bid_trx_id;
-	
 	
 	@Column(name="user_id", nullable=false, unique=true, length=11)
 	private int user_id;
