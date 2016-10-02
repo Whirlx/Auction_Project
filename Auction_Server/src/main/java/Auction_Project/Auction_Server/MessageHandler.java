@@ -372,10 +372,10 @@ public class MessageHandler
 	// |               Bid on item               |
 	// |=========================================|
 	
-	@PUT 
-    @Path("/items/{reqItemName}/bid") // Path = http://localhost:8080/Auction_Server/items/Item1/bid
+	@GET
+    @Path("/items/{reqItemName}/bid") // Path = http://localhost:8080/Auction_Server/items/Item1/bid/?price=100
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response bidItem(int price, @PathParam("reqItemName") String requestedItemName) 
+    public Response bidItem(@PathParam("reqItemName") String requestedItemName, @QueryParam("price") String price) 
 	{
 		String userIP = request.getRemoteAddr();
 		String message;
@@ -397,9 +397,9 @@ public class MessageHandler
 			item requestedItem = item_impl.getItemByName(requestedItemName);
 			if(requestedItem != null)
 			{
-				requestedItem.setItemLastBidPrice(price);
+				requestedItem.setItemLastBidPrice(Integer.parseInt(price));
 				item_impl.updateItem(requestedItem);
-				message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, invalid authentication header.";
+				message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Success.";
 				logger.info(message);
 				return Response.status(200).entity(toJsonString(message)).build(); // Success
 			}

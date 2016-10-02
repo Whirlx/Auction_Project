@@ -105,7 +105,7 @@ public class itemImpl implements itemInterface
 		//user u = (user) session.load(user.class, new Integer(user_id));
 		item item = (item) session.byNaturalId( item.class ).using("item_name",new String(item_name)).load();
 				//.getReference();
-		logger.info("Item loaded successfully, Item details="+item.toString());
+		//logger.info("Item loaded successfully, Item details="+item.toString());
 		tx.commit();
 		return item;
 	}
