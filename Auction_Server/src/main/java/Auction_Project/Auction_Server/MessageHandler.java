@@ -217,12 +217,22 @@ public class MessageHandler
 	// |===================================================|
 	
 	@GET 
-    @Path("/users/{reqUser}/items") // Path = http://localhost:8080/Auction_Server/users/Admin/items/?username=Admin&password=Admin
-    public Response viewUserItems(@PathParam("reqUser") String requestedUserName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/users/{reqUser}/items") // Path = http://localhost:8080/Auction_Server/users/Admin/items
+    public Response viewUserItems(@PathParam("reqUser") String requestedUserName) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		System.out.println("Username: "+userName);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
@@ -230,18 +240,21 @@ public class MessageHandler
 			user requestedUser = user_impl.getUserByName(requestedUserName);
 			if(requestedUser != null)
 			{
-				logger.info("["+userName+"] -> User "+requestedUserName+" view auctions.");
+				message = "["+userName+" @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Success.";
+				logger.info(message);
 				return Response.status(200).entity(toJsonString(item_impl.listItemsForUserId(requestedUser.getUserId()))).build(); // Success
 			}
 			else
 			{
-				logger.warning("Failed getting auctions for user "+requestedUserName+" because of bad username.");
-				String message = "Error: Getting user auctions failed because of bad username.";
-				return Response.status(400).entity(toJsonString(message)).build(); // Bad requested username
+				message = "["+userName+" @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, username doesn't exist.";
+				logger.warning(message);
+				return Response.status(400).entity(toJsonString(message)).build();
 			}
 
 		}
-		return Response.status(200).entity("view user items").build();
+		message = "["+userName+" @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, incorrect username/password.";
+		logger.warning(message);
+		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
 	// |=======================================================|
@@ -249,9 +262,20 @@ public class MessageHandler
 	// |=======================================================|
 	
 	@GET 
-    @Path("/users/{reqUser}/auctions") // Path = http://localhost:8080/Auction_Server/users/Admin/?username=Admin&password=Admin
-    public Response viewUserParticipatedAuctions(@PathParam("reqUser") String requestedUserName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/users/{reqUser}/auctions") // Path = http://localhost:8080/Auction_Server/users/Admin
+    public Response viewUserParticipatedAuctions(@PathParam("reqUser") String requestedUserName) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
@@ -271,20 +295,32 @@ public class MessageHandler
 	// |============================================|
 	
 	@GET 
-    @Path("/items/") // Path = http://localhost:8080/Auction_Server/items/?username=Admin&password=Admin
-    public Response viewItems(@QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/items") // Path = http://localhost:8080/Auction_Server/items
+    public Response viewItems() 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View all items]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			itemImpl item_impl = new itemImpl(sessionFactory);
-			logger.info("["+userName+"] -> View Items");
+			message = "["+userName+" @ "+userIP+"]->[View all items]: Success.";
+			logger.info(message);
 			return Response.status(200).entity(toJsonString(item_impl.listItems())).build();
 		}
-		logger.warning("Failed getting items for user ID "+userName);
-		String message = "Error: Getting items failed.";
+		message = "["+userName+" @ "+userIP+"]->[View all items]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -293,30 +329,42 @@ public class MessageHandler
 	// |=======================================|
 	
 	@GET 
-    @Path("/items/{reqItemName}") // Path = http://localhost:8080/Auction_Server/items/Item1/?username=Admin&password=Admin
-    public Response viewItem(@PathParam("reqItemName") String requestedItemName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/items/{reqItemName}") // Path = http://localhost:8080/Auction_Server/items/Item1
+    public Response viewItem(@PathParam("reqItemName") String requestedItemName) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View item - "+requestedItemName+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			itemImpl item_impl = new itemImpl(sessionFactory);
-			logger.info("["+userName+"] -> View Item "+requestedItemName);
 			item requestedItem = item_impl.getItemByName(requestedItemName);
 			if(requestedItem != null)
 			{
+				message = "["+userName+" @ "+userIP+"]->[View item - "+requestedItemName+"]: Success.";
+				logger.info(message);
 				return Response.status(200).entity(toJsonString(requestedItem)).build(); // Success
 			}
 			else
 			{
-				logger.warning("Failed getting item profile for user "+userName+" because of bad requested item.");
-				String message = "Error: Getting item profile failed because of bad requested item.";
+				message = "["+userName+" @ "+userIP+"]->[View item - "+requestedItemName+"]: Failure, no such item.";
+				logger.warning(message);
 				return Response.status(400).entity(toJsonString(message)).build(); // Bad requested Item
 			}
 		}
-		logger.warning("Failed getting item "+requestedItemName+" for user "+userName);
-		String message = "Error: Getting item "+requestedItemName+" failed.";
+		message = "["+userName+" @ "+userIP+"]->[View item - "+requestedItemName+"]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -325,36 +373,44 @@ public class MessageHandler
 	// |=========================================|
 	
 	@PUT 
-    @Path("/items/{reqItemName}/bid") // Path = http://localhost:8080/Auction_Server/items/Item1/bid/?username=Admin&password=Admin
+    @Path("/items/{reqItemName}/bid") // Path = http://localhost:8080/Auction_Server/items/Item1/bid
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response bidItem(int price, @PathParam("reqItemName") String requestedItemName, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    public Response bidItem(int price, @PathParam("reqItemName") String requestedItemName) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
-			
 			itemImpl item_impl = new itemImpl(sessionFactory);
-			logger.info("["+userName+"] -> View Item "+requestedItemName);
 			item requestedItem = item_impl.getItemByName(requestedItemName);
 			if(requestedItem != null)
 			{
 				requestedItem.setItemLastBidPrice(price);
 				item_impl.updateItem(requestedItem);
-				String message = "Successfully bid on item "+requestedItemName;
-				logger.info("["+userName+"] -> Bid Item "+requestedItemName);
+				message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, invalid authentication header.";
+				logger.info(message);
 				return Response.status(200).entity(toJsonString(message)).build(); // Success
 			}
 			else
 			{
-				logger.warning("Failed getting ite profile for user "+userName+" because of bad requested item.");
-				String message = "Error: Getting item profile failed because of bad requested item.";
-				return Response.status(400).entity(toJsonString(message)).build(); // Bad requested Item
+				message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, no such item.";
+				return Response.status(400).entity(toJsonString(message)).build(); 
 			}
 		}
-		logger.warning("Failed bid on item "+requestedItemName+" by user "+userName);
-		String message = "Error: Bid on item "+requestedItemName+" failed.";
+		message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -363,10 +419,21 @@ public class MessageHandler
 	// |=====================================================|
 	
 	@POST 
-    @Path("/items/add") // Path = http://localhost:8080/Auction_Server/items/add/?username=Admin&password=Admin
+    @Path("/items/add") // Path = http://localhost:8080/Auction_Server/items/add
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response addItem(item inputItem, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    public Response addItem(item inputItem) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[Put item up for auction - "+inputItem.getItemName()+"]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
@@ -375,12 +442,12 @@ public class MessageHandler
 			item newItem = new item(inputItem);
 			itemImpl item_impl = new itemImpl(sessionFactory);
 			item_impl.addItem(newItem);
-			String message = "Item "+newItem.getItemName()+" has been successfully added.";
-			logger.info("["+newItem.getItemName()+"] has been successfully added to the Auction Server.");
-			return Response.status(201).entity(toJsonString(message)).build();
+			message = "["+userName+" @ "+userIP+"]->[Put item up for auction - "+inputItem.getItemName()+"]: Success.";
+			logger.info(message);
+			return Response.status(200).entity(toJsonString(message)).build();
 		}
-		logger.warning("Failed to add item "+inputItem.getItemName()+" by user ID "+userName);
-		String message = "Error: item add fail.";
+		message = "["+userName+" @ "+userIP+"]->[Put item up for auction - "+inputItem.getItemName()+"]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -389,20 +456,32 @@ public class MessageHandler
 	// |==================================================|
 	
 	@GET 
-    @Path("/items/category") // Path = http://localhost:8080/Auction_Server/items/category/?username=Admin&password=Admin
-    public Response viewItemCategories(@QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/items/category") // Path = http://localhost:8080/Auction_Server/items/category
+    public Response viewItemCategories() 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[View item categories]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) )
 		{
 			itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
-			logger.info("["+userToAuth.getUserName()+"] -> View all item categories");
+			message = "["+userName+" @ "+userIP+"]->[View item categories]: Success.";
+			logger.info(message);
 			return Response.status(200).entity(toJsonString(item_category_impl.listItemCategories())).build();
 		}
-		logger.warning("Failed to view item categories by user ID "+userName);
-		String message = "Error: view item categories failed.";
+		message = "["+userName+" @ "+userIP+"]->[View item categories]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -411,15 +490,24 @@ public class MessageHandler
 	// |===============================================|
 	
 	@POST 
-    @Path("/items/category/add") // Path = http://localhost:8080/Auction_Server/items/category/add/?username=Admin&password=Admin
+    @Path("/items/category/add") // Path = http://localhost:8080/Auction_Server/items/category/add
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response addItemCategory(itemCategory inputItemCategory, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    public Response addItemCategory(itemCategory inputItemCategory) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[Add item category]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		String message;
-		
 		if( isAuthentic(userToAuth, password) )
 		{
 			itemCategory newItemCategory = new itemCategory(inputItemCategory);
@@ -428,19 +516,19 @@ public class MessageHandler
 			if( item_category_impl.getItemCategoryByName(newItemCategory.getItemCategoryName()) == null)
 			{
 				item_category_impl.addItemCategory(newItemCategory);
-				message = "Item category "+newItemCategory.getItemCategoryName()+" has been successfully added.";
-				logger.info("["+newItemCategory.getItemCategoryName()+"] has been successfully added to the Auction Server.");
+				message = "["+userName+" @ "+userIP+"]->[Add item category]: Success.";
+				logger.info(message);
 			}
 			else
 			{
-				message = "Item category "+newItemCategory.getItemCategoryName()+" has failed to be added because category name exists.";
-				logger.info("["+newItemCategory.getItemCategoryName()+"] has failed to be added because category name exists.");
+				message = "["+userName+" @ "+userIP+"]->[Add item category]: Failure, item category already exists.";
+				logger.info(message);
 			}
 
 			return Response.status(200).entity(toJsonString(message)).build();
 		}
-		logger.warning("Failed to add item category "+inputItemCategory.getItemCategoryName()+" by user ID "+userName);
-		message = "Error: item category add fail.";
+		message = "["+userName+" @ "+userIP+"]->[Add item category]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
@@ -449,14 +537,23 @@ public class MessageHandler
 	// |==================================================|
 	
 	@DELETE
-    @Path("/items/category/{reqItemCategory}/delete") // Path = http://localhost:8080/Auction_Server/items/category/Category1/delete/?username=Admin&password=Admin
-    public Response deleteItemCategory(@PathParam("reqItemCategory") String requestedItemCategory, @QueryParam("username") String userName, @QueryParam("password") String password) 
+    @Path("/items/category/{reqItemCategory}/delete") // Path = http://localhost:8080/Auction_Server/items/category/Category1/delete
+    public Response deleteItemCategory(@PathParam("reqItemCategory") String requestedItemCategory) 
 	{
+		String userIP = request.getRemoteAddr();
+		String message;
+		String decodedHeader = decodeHeader();
+		if(decodedHeader == null)
+		{
+			message = "[? @ "+userIP+"]->[Delete item category]: Failure, invalid authentication header.";
+			logger.warning(message);
+			return Response.status(400).entity(toJsonString(message)).build();
+		}
+		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		String message;
-		
 		if( isAuthentic(userToAuth, password) )
 		{
 			itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
@@ -464,19 +561,19 @@ public class MessageHandler
 			if( item_category_impl.getItemCategoryByName(requestedItemCategory) != null)
 			{
 				item_category_impl.removeItemCategory(item_category_impl.getItemCategoryByName(requestedItemCategory).getItemCategoryID());
-				logger.info("["+userToAuth.getUserName()+"] -> Item category "+requestedItemCategory+" Delete");
-				message = "Item category "+requestedItemCategory+" has been successfully deleted.";
+				message = "["+userName+" @ "+userIP+"]->[Delete item category]: Failure, Success.";
+				logger.info(message);
 			}
 			else
 			{
-				logger.info("["+userToAuth.getUserName()+"] -> Item category "+requestedItemCategory+" wasn't deleted because no such category exists.");
-				message = "Item category "+requestedItemCategory+" wasn't deleted because no such category exists.";
+				message = "["+userName+" @ "+userIP+"]->[Delete item category]: Failure, no such item category exists.";
+				logger.info(message);
 			}
 			
 			return Response.status(200).entity(toJsonString(message)).build();
 		}
-		logger.warning("Failed to delete item category "+requestedItemCategory+" by user "+userName);
-		message = "Error: item category delete fail.";
+		message = "["+userName+" @ "+userIP+"]->[Delete item category]: Failure, incorrect username/password.";
+		logger.warning(message);
 		return Response.status(400).entity(toJsonString(message)).build();
     }
 	
