@@ -40,6 +40,7 @@
 		<mapping class="Auction_Project.Auction_Server.hibernate.model.user"/>
 		<mapping class="Auction_Project.Auction_Server.hibernate.model.item"/>
 		<mapping class="Auction_Project.Auction_Server.hibernate.model.itemCategory"/>
+		<mapping class="Auction_Project.Auction_Server.hibernate.model.auctionBidTransactions"/>
 		
 	</session-factory>
 </hibernate-configuration>

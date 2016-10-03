@@ -84,11 +84,11 @@ public class item {
     	this.item_picture = item.getItemPicture();
     	this.item_start_price = item.getItemStartingPrice();
     	this.item_last_bid_price = 0;
-    	Calendar c = Calendar.getInstance();
-    	this.item_last_bid_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
-		this.item_last_bid_userid = 0;
-		this.insert_time = this.item_last_bid_time;
-		this.update_time = this.insert_time;
+    	//Calendar c = Calendar.getInstance();
+    	this.item_last_bid_time = item.getItem_last_bid_time();
+		this.item_last_bid_userid = item.getItem_last_bid_userid();
+		this.insert_time = item.getInsert_time();
+		this.update_time = item.getUpdate_time();
     }
 	
 	public String toString(){

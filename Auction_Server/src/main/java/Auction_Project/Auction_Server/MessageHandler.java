@@ -3,6 +3,7 @@ package Auction_Project.Auction_Server;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -25,20 +26,25 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import Auction_Project.Auction_Server.hibernate.HibernateUtil;
+import Auction_Project.Auction_Server.hibernate.Impl.auctionBidTransactionsImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.itemCategoryImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.itemImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.userImpl;
 import Auction_Project.Auction_Server.hibernate.model.user;
+import Auction_Project.Auction_Server.hibernate.model.ItemAdapter;
+import Auction_Project.Auction_Server.hibernate.model.auctionBidTransactions;
 import Auction_Project.Auction_Server.hibernate.model.item;
 import Auction_Project.Auction_Server.hibernate.model.itemCategory;
 
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.service.ServiceRegistry;
 
 import sun.misc.BASE64Decoder;
@@ -48,6 +54,10 @@ import sun.misc.BASE64Decoder;
 public class MessageHandler 
 {
 	public static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
+	private String userIP;
+	private String message;
+	private String userName;
+	private String password;
 	
 	@Context
 	private HttpServletRequest request;
@@ -59,10 +69,8 @@ public class MessageHandler
 	@GET
     public Response openingMessage()  // Opening message when entering the server
 	{
-		String userIP = request.getRemoteAddr();
-		logger.info("[Guest @ "+userIP+"] has entered the server lobby.");
-		String message = "Welcome to the Auction Server!";	
-		return Response.status(200).entity(toJsonString(message)).build();
+		issueWelcomeMessage("Welcome to the Auction Server!");
+		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
 	// |===========================================|
@@ -74,23 +82,20 @@ public class MessageHandler
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response registerUser(user inputUser) 
 	{
-		String userIP = request.getRemoteAddr();
+		String issuedCommand = "Register";
+		String requestedEntity = "user";
 		user newUser = new user(inputUser);
+		this.userName = newUser.getUserName();
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
-		String message;
-		if( user_impl.getUserByName(newUser.getUserName()) == null)
+		if( user_impl.getUserByName(newUser.getUserName()) != null)
 		{
-			user_impl.addUser(newUser);
-			message = "["+newUser.getUserName()+" @ "+userIP+"]->[Register]: Success.";
-			logger.info(message);
+			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		else
-		{
-			message = "["+newUser.getUserName()+" @ "+userIP+"]->[Register]: Failure, username is already taken.";
-			logger.info(message);
-		}
-		return Response.status(200).entity(toJsonString(message)).build();
+		user_impl.addUser(newUser);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(message)).build(); // Success
 	}
 	
 	// |===============================================|
@@ -101,39 +106,31 @@ public class MessageHandler
     @Path("/users/{reqUser}") // Path = http://localhost:8080/Auction_Server/users/Admin
     public Response userProfile(@PathParam("reqUser") String requestedUserName) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "View User Profile - "+requestedUserName;
+		String requestedEntity = "user";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			user requestedUser = user_impl.getUserByName(requestedUserName);
-			if(requestedUser != null)
-			{
-				message = "["+userName+" @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Success.";
-				logger.info(message);
-				return Response.status(200).entity(toJsonString(requestedUser)).build(); // Success
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Failure, no such username.";
-				logger.warning(message);
-				return Response.status(400).entity(toJsonString(message)).build(); // Failure
-			}
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[View User Profile - "+requestedUserName+"]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		
+		user requestedUser = user_impl.getUserByName(requestedUserName);
+		if(requestedUser == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(requestedUser)).build(); // Success
+		
     }
 	
 	// |============================================|
@@ -144,29 +141,22 @@ public class MessageHandler
     @Path("/users") // Path = http://localhost:8080/Auction_Server/users
     public Response getUsers() 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "View all users";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View all users]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			message = "["+userName+" @ "+userIP+"]->[View all users]: Success.";
-			logger.info(message);
-			return Response.status(200).entity(toJsonString(user_impl.listUsers())).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[View all users]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(user_impl.listUsers())).build(); // Success
     }
 	
 	// |========================================|
@@ -177,39 +167,30 @@ public class MessageHandler
     @Path("/users/{reqUser}/delete") // Path = http://localhost:8080/Auction_Server/users/Admin/delete
     public Response deleteUser(@PathParam("reqUser") String requestedUserName) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "Delete User - "+requestedUserName;
+		String requestedEntity = "user";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			if( user_impl.getUserByName(requestedUserName) != null)
-			{
-				user_impl.removeUser(user_impl.getUserByName(requestedUserName).getUserId());
-				message = "["+userName+" @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Success.";
-				logger.info(message);
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Failure, username doesn't exist.";
-				logger.info(message);
-			}
-			
-			return Response.status(200).entity(toJsonString(message)).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[Delete User - "+requestedUserName+"]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+			
+		if( user_impl.getUserByName(requestedUserName) == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		user_impl.removeUser(user_impl.getUserByName(requestedUserName).getUserId());
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
 	// |===================================================|
@@ -220,74 +201,74 @@ public class MessageHandler
     @Path("/users/{reqUser}/items") // Path = http://localhost:8080/Auction_Server/users/Admin/items
     public Response viewUserItems(@PathParam("reqUser") String requestedUserName) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "Delete User - "+requestedUserName;
+		String requestedEntity = "user";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false)
 		{
-			itemImpl item_impl = new itemImpl(sessionFactory);
-			user requestedUser = user_impl.getUserByName(requestedUserName);
-			if(requestedUser != null)
-			{
-				message = "["+userName+" @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Success.";
-				logger.info(message);
-				return Response.status(200).entity(toJsonString(item_impl.listItemsForUserId(requestedUser.getUserId()))).build(); // Success
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, username doesn't exist.";
-				logger.warning(message);
-				return Response.status(400).entity(toJsonString(message)).build();
-			}
-
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		user requestedUser = user_impl.getUserByName(requestedUserName);
+		if( requestedUser == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(item_impl.listItemsForUserId(requestedUser.getUserId()))).build(); // Success
+
     }
 	
-	// |=======================================================|
-	// |               View participated Auctions              |
-	// |=======================================================|
+	// |================================================================|
+	// |               View user/own participated Auctions              |
+	// |================================================================|
 	
 	@GET 
-    @Path("/users/{reqUser}/auctions") // Path = http://localhost:8080/Auction_Server/users/Admin
+    @Path("/users/{reqUser}/auctions") // Path = http://localhost:8080/Auction_Server/users/Admin/auctions
     public Response viewUserParticipatedAuctions(@PathParam("reqUser") String requestedUserName) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "View participated auctions for - "+requestedUserName;
+		String requestedEntity = "user";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View auctions for User - "+requestedUserName+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			//if( requestedUserID == userName )
-			//{
-				// price
-				// buyers info
-			//}
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		return Response.status(200).entity("view user items").build();
+		user requestedUser = user_impl.getUserByName(requestedUserName);
+		if( requestedUser == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		List<Integer> participatedItemIDsList = trx_impl.listParticipatedItemIDsForUserByUserID(requestedUser.getUserId());
+		List<item> participatedItemsList = new ArrayList<item>();
+		for(Integer i : participatedItemIDsList)
+		{
+			item itemToAdd = new item(item_impl.getItemById(i));
+			participatedItemsList.add(itemToAdd);
+		}
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(participatedItemsList).build(); // Success
     }
 	
 	// |============================================|
@@ -298,30 +279,23 @@ public class MessageHandler
     @Path("/items") // Path = http://localhost:8080/Auction_Server/items
     public Response viewItems() 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "View all items";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View all items]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			itemImpl item_impl = new itemImpl(sessionFactory);
-			message = "["+userName+" @ "+userIP+"]->[View all items]: Success.";
-			logger.info(message);
-			return Response.status(200).entity(toJsonString(item_impl.listItems())).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[View all items]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(item_impl.listItems())).build(); // Success
     }
 	
 	// |=======================================|
@@ -332,40 +306,30 @@ public class MessageHandler
     @Path("/items/{reqItemName}") // Path = http://localhost:8080/Auction_Server/items/Item1
     public Response viewItem(@PathParam("reqItemName") String requestedItemName) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "View item - "+requestedItemName;
+		String requestedEntity = "item";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View item - "+requestedItemName+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			itemImpl item_impl = new itemImpl(sessionFactory);
-			item requestedItem = item_impl.getItemByName(requestedItemName);
-			if(requestedItem != null)
-			{
-				message = "["+userName+" @ "+userIP+"]->[View item - "+requestedItemName+"]: Success.";
-				logger.info(message);
-				return Response.status(200).entity(toJsonString(requestedItem)).build(); // Success
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[View item - "+requestedItemName+"]: Failure, no such item.";
-				logger.warning(message);
-				return Response.status(400).entity(toJsonString(message)).build(); // Bad requested Item
-			}
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[View item - "+requestedItemName+"]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		item requestedItem = item_impl.getItemByName(requestedItemName);
+		if(requestedItem == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(requestedItem)).build(); // Success
     }
 	
 	// |=========================================|
@@ -377,41 +341,35 @@ public class MessageHandler
 	@Consumes(MediaType.APPLICATION_JSON)
     public Response bidItem(@PathParam("reqItemName") String requestedItemName, @QueryParam("price") String price) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "Bid on item - "+requestedItemName;
+		String requestedEntity = "item";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			itemImpl item_impl = new itemImpl(sessionFactory);
-			item requestedItem = item_impl.getItemByName(requestedItemName);
-			if(requestedItem != null)
-			{
-				requestedItem.setItemLastBidPrice(Integer.parseInt(price));
-				item_impl.updateItem(requestedItem);
-				message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Success.";
-				logger.info(message);
-				return Response.status(200).entity(toJsonString(message)).build(); // Success
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, no such item.";
-				return Response.status(400).entity(toJsonString(message)).build(); 
-			}
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[Bid on item - "+requestedItemName+"]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		item requestedItem = item_impl.getItemByName(requestedItemName);
+		if(requestedItem == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		requestedItem.setItemLastBidPrice(Integer.parseInt(price));
+		item_impl.updateItem(requestedItem);
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		auctionBidTransactions bid_trx = new auctionBidTransactions(userToAuth.getUserId(), requestedItem.getItemID(), requestedItem.getItemLastBidPrice());
+		trx_impl.addAuctionBidTransaction(bid_trx);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
 	// |=====================================================|
@@ -423,32 +381,31 @@ public class MessageHandler
 	@Consumes(MediaType.APPLICATION_JSON)
     public Response addItem(item inputItem) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "Put item up for auction - "+inputItem.getItemName();
+		String requestedEntity = "item";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[Put item up for auction - "+inputItem.getItemName()+"]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			item newItem = new item(inputItem);
-			itemImpl item_impl = new itemImpl(sessionFactory);
-			item_impl.addItem(newItem);
-			message = "["+userName+" @ "+userIP+"]->[Put item up for auction - "+inputItem.getItemName()+"]: Success.";
-			logger.info(message);
-			return Response.status(200).entity(toJsonString(message)).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[Put item up for auction - "+inputItem.getItemName()+"]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		item newItem = new item(inputItem);
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		if( item_impl.getItemByName(newItem.getItemName()) != null)
+		{
+			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		item_impl.addItem(newItem);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
 	// |==================================================|
@@ -459,30 +416,23 @@ public class MessageHandler
     @Path("/items/category") // Path = http://localhost:8080/Auction_Server/items/category
     public Response viewItemCategories() 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "View item categories";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[View item categories]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
-			message = "["+userName+" @ "+userIP+"]->[View item categories]: Success.";
-			logger.info(message);
-			return Response.status(200).entity(toJsonString(item_category_impl.listItemCategories())).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[View item categories]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(item_category_impl.listItemCategories())).build(); // Success
     }
 	
 	// |===============================================|
@@ -494,42 +444,31 @@ public class MessageHandler
 	@Consumes(MediaType.APPLICATION_JSON)
     public Response addItemCategory(itemCategory inputItemCategory) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "Add item category - "+inputItemCategory.getItemCategoryName();
+		String requestedEntity = "item category";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[Add item category]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			itemCategory newItemCategory = new itemCategory(inputItemCategory);
-			itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
-			
-			if( item_category_impl.getItemCategoryByName(newItemCategory.getItemCategoryName()) == null)
-			{
-				item_category_impl.addItemCategory(newItemCategory);
-				message = "["+userName+" @ "+userIP+"]->[Add item category]: Success.";
-				logger.info(message);
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[Add item category]: Failure, item category already exists.";
-				logger.info(message);
-			}
-
-			return Response.status(200).entity(toJsonString(message)).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[Add item category]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		itemCategory newItemCategory = new itemCategory(inputItemCategory);
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		if( item_category_impl.getItemCategoryByName(newItemCategory.getItemCategoryName()) != null)
+		{
+			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		item_category_impl.addItemCategory(newItemCategory);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
 	// |==================================================|
@@ -540,41 +479,93 @@ public class MessageHandler
     @Path("/items/category/{reqItemCategory}/delete") // Path = http://localhost:8080/Auction_Server/items/category/Category1/delete
     public Response deleteItemCategory(@PathParam("reqItemCategory") String requestedItemCategory) 
 	{
-		String userIP = request.getRemoteAddr();
-		String message;
-		String decodedHeader = decodeHeader();
-		if(decodedHeader == null)
+		String issuedCommand = "Delete item category - "+requestedItemCategory;
+		String requestedEntity = "item category";
+		if( verifyHeader() == false )
 		{
-			message = "[? @ "+userIP+"]->[Delete item category]: Failure, invalid authentication header.";
-			logger.warning(message);
-			return Response.status(400).entity(toJsonString(message)).build();
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		String userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
-		String password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
 		userImpl user_impl = new userImpl(sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
-		if( isAuthentic(userToAuth, password) )
+		if( isAuthentic(userToAuth, password) == false )
 		{
-			itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
-			
-			if( item_category_impl.getItemCategoryByName(requestedItemCategory) != null)
-			{
-				item_category_impl.removeItemCategory(item_category_impl.getItemCategoryByName(requestedItemCategory).getItemCategoryID());
-				message = "["+userName+" @ "+userIP+"]->[Delete item category]: Failure, Success.";
-				logger.info(message);
-			}
-			else
-			{
-				message = "["+userName+" @ "+userIP+"]->[Delete item category]: Failure, no such item category exists.";
-				logger.info(message);
-			}
-			
-			return Response.status(200).entity(toJsonString(message)).build();
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		message = "["+userName+" @ "+userIP+"]->[Delete item category]: Failure, incorrect username/password.";
-		logger.warning(message);
-		return Response.status(400).entity(toJsonString(message)).build();
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		
+		if( item_category_impl.getItemCategoryByName(requestedItemCategory) == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		item_category_impl.removeItemCategory(item_category_impl.getItemCategoryByName(requestedItemCategory).getItemCategoryID());
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(message)).build();
+    }
+	
+	// |===========================================================|
+	// |               View all auction transactions               |
+	// |===========================================================|
+	
+	@GET 
+    @Path("/transactions") // Path = http://localhost:8080/Auction_Server/transactions
+    public Response viewAllAuctionTransactions() 
+	{
+		String issuedCommand = "View all auction transactions";
+		if( verifyHeader() == false )
+		{
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+		userImpl user_impl = new userImpl(sessionFactory);
+		user userToAuth = user_impl.getUserByName(userName);
+		if( isAuthentic(userToAuth, password) == false )
+		{
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(trx_impl.listAuctionBidTransactions())).build(); // Success
+    }
+	
+	// |================================================================|
+	// |               View specific auction transactions               |
+	// |================================================================|
+	
+	@GET 
+    @Path("/transactions/{reqItemName}") // Path = http://localhost:8080/Auction_Server/transactions/Item1
+    public Response viewAllAuctionTransactions(@PathParam("reqItemName") String requestedItemName) 
+	{
+		String issuedCommand = "View auction transactions for - "+requestedItemName;
+		String requestedEntity = "item";
+		if( verifyHeader() == false )
+		{
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+		userImpl user_impl = new userImpl(sessionFactory);
+		user userToAuth = user_impl.getUserByName(userName);
+		if( isAuthentic(userToAuth, password) == false )
+		{
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		item requestedItem = item_impl.getItemByName(requestedItemName);
+		if(requestedItem == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(trx_impl.listAuctionBidTransactionsForItemById(requestedItem.getItemID()))).build(); // Success
     }
 	
 	/*	#####################################
@@ -623,7 +614,56 @@ public class MessageHandler
 		}
 		return decodedHeader;
 	}
+	
+	private boolean verifyHeader()
+	{
+		String decodedHeader = decodeHeader();
+		this.userName = "";
+		this.password = "";
+		this.userIP = request.getRemoteAddr();
+		if(decodedHeader == null)
+		{
+			return false;
+		}
+		this.userName = decodedHeader.substring(0, decodedHeader.indexOf(":"));
+		this.password = decodedHeader.substring(decodedHeader.indexOf(":")+1);
+		return true;
+	}
+	
+	private void issueWelcomeMessage(String welcomeMessage)
+	{
+		this.message = welcomeMessage;
+		logger.info("[Guest @ "+this.userIP+"] has entered the server lobby.");
+	}
+	
+	private void issueSuccessMessage(String issuedCommand)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Success.";
+		logger.info(message);
+	}
+	
+	private void issueHeaderErrorMessage(String issuedCommand)
+	{
+		this.message = "[? @ "+this.userIP+"]->["+issuedCommand+"]: Failure, invalid authentication header.";
+		logger.warning(message);
+	}
+	
+	private void issueAuthenticationErrorMessage(String issuedCommand)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, incorrect username/password.";
+		logger.warning(message);
+	}
+	
+	private void issueEntityMissingErrorMessage(String issuedCommand, String requestedEntity)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, no such "+requestedEntity+".";
+		logger.warning(message);
+	}
+	
+	private void issueEntityExistsErrorMessage(String issuedCommand, String requestedEntity)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->[issuedCommand]: Failure, "+requestedEntity+" already exists.";
+		logger.warning(message);
+	}
+	
 }
-	
-
-	

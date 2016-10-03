@@ -30,7 +30,7 @@ public class auctionBidTransactions {
 	@Column(name="item_id", nullable=false, unique=true, length=11)
 	private int item_id;
 	
-	@Column(name="item_bid_time", nullable=false, unique=true, length=11)
+	@Column(name="item_bid_time", nullable=true, unique=true, length=11)
 	private String  item_bid_time;
 
 	@Column(name="item_bid_price", nullable=false, unique=true, length=11)
@@ -60,6 +60,12 @@ public class auctionBidTransactions {
 		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
 		this.update_time = this.insert_time;
     }
+
+	public auctionBidTransactions(int userId, int itemID, int itemLastBidPrice) {
+		this.user_id = userId;
+		this.item_id = itemID;
+		this.item_bid_price = itemLastBidPrice;
+	}
 
 	@JsonProperty("user_id")
 	public int getUser_id() {
