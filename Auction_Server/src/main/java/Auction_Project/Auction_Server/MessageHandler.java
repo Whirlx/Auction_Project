@@ -474,11 +474,11 @@ public class MessageHandler
 	// |===============================================|
 	
 	@POST 
-    @Path("/items/category/add") // Path = http://localhost:8080/Auction_Server/items/category/add
+    @Path("/items/category/add/{category_name}") // Path = http://localhost:8080/Auction_Server/items/category/add/Default
 	@Consumes(MediaType.APPLICATION_JSON)
-    public Response addItemCategory(itemCategory inputItemCategory) 
+    public Response addItemCategory(@PathParam("category_name") String category_name) 
 	{
-		String issuedCommand = "Add item category - "+inputItemCategory.getItemCategoryName();
+		String issuedCommand = "Add item category - "+category_name;
 		String requestedEntity = "item category";
 		if( verifyHeader() == false )
 		{
@@ -493,9 +493,9 @@ public class MessageHandler
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemCategory newItemCategory = new itemCategory(inputItemCategory);
+		itemCategory newItemCategory = new itemCategory(category_name);
 		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
-		if( item_category_impl.getItemCategoryByName(newItemCategory.getItemCategoryName()) != null)
+		if( item_category_impl.getItemCategoryByName(category_name) != null)
 		{
 			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure

@@ -48,6 +48,11 @@ public class itemCategory {
 		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
 		this.update_time = this.insert_time;
     }
+	
+	public itemCategory(String item_category_name) {
+		this.item_category_name = item_category_name;
+		
+	}
 
 	@JsonProperty("item_category_id")
 	public int getItemCategoryID() {

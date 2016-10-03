@@ -37,7 +37,7 @@ public class item {
 	private String item_desc;
 	
 	@Column(name="item_picture", length=100, nullable=true)
-	private int item_picture; // int placeholder type
+	private byte[] item_picture; // int placeholder type
 	
 	@Column(name="item_start_price", length=100, nullable=true)
 	private int item_start_price;
@@ -59,7 +59,7 @@ public class item {
 	
 	public item() {}
 	
-	public item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, int item_picture, int item_start_price) {
+	public item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, byte[] item_picture, int item_start_price) {
 		this.item_id = item_id;
 		this.item_user_id = item_user_id;
 		this.item_category = item_category;
@@ -155,11 +155,11 @@ public class item {
 	}
 	
 	@JsonProperty("item_picture")
-	public int getItemPicture() {
+	public byte[] getItemPicture() {
 		return item_picture;
 	}
 
-	public void setItemPicture(int item_picture) {
+	public void setItemPicture(byte[] item_picture) {
 		this.item_picture = item_picture;
 	}
 
