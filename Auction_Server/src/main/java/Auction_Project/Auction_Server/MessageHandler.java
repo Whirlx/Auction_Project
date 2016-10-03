@@ -31,7 +31,6 @@ import Auction_Project.Auction_Server.hibernate.Impl.itemCategoryImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.itemImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.userImpl;
 import Auction_Project.Auction_Server.hibernate.model.user;
-import Auction_Project.Auction_Server.hibernate.model.ItemAdapter;
 import Auction_Project.Auction_Server.hibernate.model.auctionBidTransactions;
 import Auction_Project.Auction_Server.hibernate.model.item;
 import Auction_Project.Auction_Server.hibernate.model.itemCategory;
@@ -84,6 +83,7 @@ public class MessageHandler
 	{
 		String issuedCommand = "Register";
 		String requestedEntity = "user";
+		this.userIP = request.getRemoteAddr();
 		user newUser = new user(inputUser);
 		this.userName = newUser.getUserName();
 		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
@@ -298,6 +298,40 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(item_impl.listItems())).build(); // Success
     }
 	
+	// |===================================================|
+	// |               View Items by Category              |
+	// |===================================================|
+	
+	@GET 
+    @Path("/items/category/{reqCategoryName}") // Path = http://localhost:8080/Auction_Server/items/category/Default_Category
+    public Response viewItemsByCategory(@PathParam("reqCategoryName") String requestedItemCategory) 
+	{
+		String issuedCommand = "View items from category "+requestedItemCategory;
+		String requestedEntity = "item category";
+		if( verifyHeader() == false )
+		{
+			issueHeaderErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
+		userImpl user_impl = new userImpl(sessionFactory);
+		user userToAuth = user_impl.getUserByName(userName);
+		if( isAuthentic(userToAuth, password) == false )
+		{
+			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		if( item_category_impl.getItemCategoryByName(requestedItemCategory) == null)
+		{
+			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		itemImpl item_impl = new itemImpl(sessionFactory);
+		issueSuccessMessage(issuedCommand);
+		return Response.status(200).entity(toJsonString(item_impl.listItemsByCategoryName(requestedItemCategory))).build(); // Success
+    }
+	
 	// |=======================================|
 	// |               View item               |
 	// |=======================================|
@@ -476,7 +510,7 @@ public class MessageHandler
 	// |==================================================|
 	
 	@DELETE
-    @Path("/items/category/{reqItemCategory}/delete") // Path = http://localhost:8080/Auction_Server/items/category/Category1/delete
+    @Path("/items/category/{reqItemCategory}/delete") // Path = http://localhost:8080/Auction_Server/items/category/default-categories/delete
     public Response deleteItemCategory(@PathParam("reqItemCategory") String requestedItemCategory) 
 	{
 		String issuedCommand = "Delete item category - "+requestedItemCategory;
@@ -495,7 +529,6 @@ public class MessageHandler
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
-		
 		if( item_category_impl.getItemCategoryByName(requestedItemCategory) == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
@@ -662,7 +695,7 @@ public class MessageHandler
 	
 	private void issueEntityExistsErrorMessage(String issuedCommand, String requestedEntity)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->[issuedCommand]: Failure, "+requestedEntity+" already exists.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, "+requestedEntity+" already exists.";
 		logger.warning(message);
 	}
 	

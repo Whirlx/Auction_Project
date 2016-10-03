@@ -40,7 +40,7 @@ COLLATE = utf8_bin
 
 create table item_categories(
 item_category_id	int NOT NULL AUTO_INCREMENT,			
-item_category_name 	varchar(1000) NOT NULL,
+item_category_name 	varchar(100) NOT NULL,
 insert_time 	timestamp(6) default current_timestamp(6),
 update_time 	timestamp(6) default current_timestamp(6) on update current_timestamp(6),
 primary key (item_category_id),
@@ -56,7 +56,7 @@ COLLATE = utf8_bin
 create table items(
 item_id				int NOT NULL AUTO_INCREMENT,			
 item_user_id		int NOT NULL,
-item_category		int NOT NULL,
+item_category		varchar(100) NOT NULL,
 item_name			varchar(100),
 item_desc			varchar(1000),
 item_picture		blob,
@@ -67,7 +67,7 @@ item_last_bid_userid int ,
 insert_time 	timestamp(6) default current_timestamp(6),
 update_time 	timestamp(6) default current_timestamp(6) on update current_timestamp(6),
 primary key (item_id),
-FOREIGN KEY `fkCategory` (`item_category`) REFERENCES `item_categories` (`item_category_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+FOREIGN KEY `fkCategory` (`item_category`) REFERENCES `item_categories` (`item_category_name`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 FOREIGN KEY `fkUserid` (`item_user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 key item_category (item_category),
 unique key item_name  (item_name),
@@ -110,4 +110,4 @@ insert into users(user_id,user_name,user_pwd,first_name,last_name,phone_number,e
 	values (0,"Admin","Admin","Administrator","Administrator", "-", "-");
 
 insert into item_categories(item_category_id,item_category_name)
-	values (0,"default-categories");
+	values (0,"Default");

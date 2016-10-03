@@ -87,6 +87,15 @@ public class itemImpl implements itemInterface
 		tx.commit();
 		return itemsList;
 	}
+	
+	@Override
+	public List<item> listItemsByCategoryName(String category_name) {
+		Session session = this.sessionFactory.getCurrentSession();
+		Transaction tx = session.beginTransaction();
+		List<item> itemsList = session.createQuery("from item where item_category = '"+category_name+"'").list();
+		tx.commit();
+		return itemsList;
+	}
 
 	@Override
 	public item getItemById(int item_id) {
