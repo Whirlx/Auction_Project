@@ -62,9 +62,9 @@ public class MessageHandler
 	@Context
 	private HttpServletRequest request;
 	
-	// |=================================================|
-	// |               Server Root Function              |
-	// |=================================================|
+	/** |=================================================|
+	    |               Server Root Function              |
+	    |=================================================| */
 	
 	@GET
     public Response openingMessage()  // Opening message when entering the server
@@ -73,9 +73,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
-	// |===========================================|
-	// |               Register User               |
-	// |===========================================|
+	/** |===========================================|
+	    |               Register User               |
+	    |===========================================| */
 	
 	@POST
 	@Path("/register") // http://localhost:8080/Auction_Server/register
@@ -98,9 +98,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
 	}
 	
-	// |===============================================|
-	// |               View User Profile               |
-	// |===============================================|
+	/** |===============================================|
+	    |               View User Profile               |
+	    |===============================================| */
 	
 	@GET 
     @Path("/users/{reqUser}") // Path = http://localhost:8080/Auction_Server/users/Admin
@@ -132,9 +132,9 @@ public class MessageHandler
 		
     }
 	
-	// |============================================|
-	// |               View all users               |
-	// |============================================|
+	/** |============================================|
+	    |               View all users               |
+	    |============================================| */
 	
 	@GET 
     @Path("/users") // Path = http://localhost:8080/Auction_Server/users
@@ -162,9 +162,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(user_impl.listUsers())).build(); // Success
     }
 	
-	// |========================================|
-	// |               Delete User              |
-	// |========================================|
+	/** |========================================|
+	    |               Delete User              |
+	    |========================================| */
 	
 	@DELETE 
     @Path("/users/{reqUser}/delete") // Path = http://localhost:8080/Auction_Server/users/Admin/delete
@@ -200,9 +200,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
-	// |===================================================|
-	// |               View user/own Auctions              |
-	// |===================================================|
+	/** |===================================================|
+	    |               View user/own Auctions              |
+	    |===================================================| */
 	
 	@GET 
     @Path("/users/{reqUser}/items") // Path = http://localhost:8080/Auction_Server/users/Admin/items
@@ -243,9 +243,9 @@ public class MessageHandler
 
     }
 	
-	// |================================================================|
-	// |               View user/own participated Auctions              |
-	// |================================================================|
+	/** |================================================================|
+	    |               View user/own participated Auctions              |
+	    |================================================================| */
 	
 	@GET 
     @Path("/users/{reqUser}/auctions") // Path = http://localhost:8080/Auction_Server/users/Admin/auctions
@@ -292,9 +292,9 @@ public class MessageHandler
 		return Response.status(200).entity(participatedItemsList).build(); // Success
     }
 	
-	// |============================================|
-	// |               View all Items               |
-	// |============================================|
+	/** |============================================|
+	    |               View all Items               |
+	    |============================================| */
 	
 	@GET 
     @Path("/items") // Path = http://localhost:8080/Auction_Server/items
@@ -318,9 +318,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(item_impl.listItems())).build(); // Success
     }
 	
-	// |===================================================|
-	// |               View Items by Category              |
-	// |===================================================|
+	/** |===================================================|
+	    |               View Items by Category              |
+	    |===================================================| */
 	
 	@GET 
     @Path("/items/category/{reqCategoryName}") // Path = http://localhost:8080/Auction_Server/items/category/Default_Category
@@ -351,9 +351,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(item_impl.listItemsByCategoryName(requestedItemCategory))).build(); // Success
     }
 	
-	// |=======================================|
-	// |               View item               |
-	// |=======================================|
+	/** |=======================================|
+	    |               View item               |
+	    |=======================================| */
 	
 	@GET 
     @Path("/items/{reqItemName}") // Path = http://localhost:8080/Auction_Server/items/Item1
@@ -384,9 +384,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(requestedItem)).build(); // Success
     }
 	
-	// |=========================================|
-	// |               Bid on item               |
-	// |=========================================|
+	/** |=========================================|
+	    |               Bid on item               |
+	    |=========================================| */
 	
 	@GET
     @Path("/items/{reqItemName}/bid") // Path = http://localhost:8080/Auction_Server/items/Item1/bid/?price=100
@@ -431,9 +431,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
-	// |=====================================================|
-	// |               Put item up for auction               |
-	// |=====================================================|
+	/** |=====================================================|
+	    |               Put item up for auction               |
+	    |=====================================================| */
 	
 	@POST 
     @Path("/items/add") // Path = http://localhost:8080/Auction_Server/items/add
@@ -466,9 +466,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
-	// |==================================================|
-	// |               View item categories               |
-	// |==================================================|
+	/** |==================================================|
+	    |               View item categories               |
+	    |==================================================| */
 	
 	@GET 
     @Path("/items/category") // Path = http://localhost:8080/Auction_Server/items/category
@@ -492,9 +492,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(item_category_impl.listItemCategories())).build(); // Success
     }
 	
-	// |===============================================|
-	// |               Add item category               |
-	// |===============================================|
+	/** |===============================================|
+	    |               Add item category               |
+	    |===============================================| */
 	
 	@POST 
     @Path("/items/category/add/{category_name}") // Path = http://localhost:8080/Auction_Server/items/category/add/Default
@@ -532,9 +532,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
 	
-	// |==================================================|
-	// |               Delete item category               |
-	// |==================================================|
+	/** |==================================================|
+	    |               Delete item category               |
+	    |==================================================| */
 	
 	@DELETE
     @Path("/items/category/{reqItemCategory}/delete") // Path = http://localhost:8080/Auction_Server/items/category/default-categories/delete
@@ -570,9 +570,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(message)).build();
     }
 	
-	// |===========================================================|
-	// |               View all auction transactions               |
-	// |===========================================================|
+	/** |===========================================================|
+	    |               View all auction transactions               |
+	    |===========================================================| */
 	
 	@GET 
     @Path("/transactions") // Path = http://localhost:8080/Auction_Server/transactions
@@ -601,9 +601,9 @@ public class MessageHandler
 		return Response.status(200).entity(toJsonString(trx_impl.listAuctionBidTransactions())).build(); // Success
     }
 	
-	// |================================================================|
-	// |               View specific auction transactions               |
-	// |================================================================|
+	/** |================================================================|
+	    |               View specific auction transactions               |
+	    |================================================================| */
 	
 	@GET 
     @Path("/transactions/{reqItemName}") // Path = http://localhost:8080/Auction_Server/transactions/Item1

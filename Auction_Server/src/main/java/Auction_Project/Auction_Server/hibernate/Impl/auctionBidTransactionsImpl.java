@@ -14,17 +14,17 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 {
 	private SessionFactory sessionFactory;
 
-	public auctionBidTransactionsImpl(SessionFactory sf)
+	public auctionBidTransactionsImpl(SessionFactory sessionFactory)
 	{
-		if (sf !=null)
+		if (sessionFactory !=null)
 		{
-			this.setSessionFactory(sf);
-			if (sf.isClosed() ) 
+			this.setSessionFactory(sessionFactory);
+			if (sessionFactory.isClosed() ) 
 			{
 			}
 			else 
 			{
-			sf.openSession();
+			//sessionFactory.openSession();
 			}
 		}
 		else
@@ -32,16 +32,17 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 		}
 	}
 	
-	public void setSessionFactory(SessionFactory sf){
-		this.sessionFactory = sf;
+	public void setSessionFactory(SessionFactory sessionFactory){
+		this.sessionFactory = sessionFactory;
 	}
 	
 	@Override
 	public void addAuctionBidTransaction(auctionBidTransactions bid_trx) {
-		Session session = this.sessionFactory.getCurrentSession();
+		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
 		session.save(bid_trx);
 		tx.commit();
+		session.close();
 	}
 
 	@Override
@@ -51,17 +52,18 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 
 	@Override
 	public List<auctionBidTransactions> listAuctionBidTransactions() {
-		Session session = this.sessionFactory.getCurrentSession();
+		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
 		List<auctionBidTransactions> transactionsList = session.createQuery("from auctionBidTransactions").list();
 		tx.commit();
+		session.close();
 		return transactionsList;
 	}
 	
 	@Override
 	public List<Integer> listParticipatedItemIDsForUserByUserID(int user_id) {
 		List<Integer> participatedItemIDsList = new ArrayList<Integer>();
-		Session session = this.sessionFactory.getCurrentSession();
+		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
 		List<auctionBidTransactions> transactionsListForUser = session.createQuery("from auctionBidTransactions where user_id = "+user_id).list();
 		for(auctionBidTransactions u : transactionsListForUser)
@@ -73,6 +75,7 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 			}
 		}
 		tx.commit();
+		session.close();
 		return participatedItemIDsList;
 	}
 
@@ -99,10 +102,11 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 
 	@Override
 	public List<auctionBidTransactions> listAuctionBidTransactionsForItemById(int item_id) {
-		Session session = this.sessionFactory.getCurrentSession();
+		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
 		List<auctionBidTransactions> transactionsList = session.createQuery("from auctionBidTransactions where item_id = "+item_id).list();
 		tx.commit();
+		session.close();
 		return transactionsList;
 	}
 

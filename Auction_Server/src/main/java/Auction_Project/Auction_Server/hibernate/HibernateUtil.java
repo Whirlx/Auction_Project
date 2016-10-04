@@ -6,19 +6,20 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+/** |==============================================================|
+	|               Hibernate Session Factory Object               |
+	|==============================================================| */
 
 public class HibernateUtil {
+	
 	public static final Logger logger = Logger.getLogger(HibernateUtil.class.getName());
 	
 	//Annotation based configuration
 	private static SessionFactory sessionAnnotationFactory;
 	private static String HIBERNATE_CONFIG_FILE="hibernate.cfg.xml";
 
-/********************************************
- * create new hibernate session factory objects
- * 
-/********************************************/
-
+	
+	
     private static SessionFactory buildSessionAnnotationFactory()
     {
     	try 
