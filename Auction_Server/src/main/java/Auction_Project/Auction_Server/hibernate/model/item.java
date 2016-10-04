@@ -1,5 +1,6 @@
 package Auction_Project.Auction_Server.hibernate.model;
 
+import java.sql.Blob;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -9,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -36,8 +38,8 @@ public class item {
 	@Column(name="item_desc", length=100, nullable=true)
 	private String item_desc;
 	
-	@Column(name="item_picture", length=100, nullable=true)
-	private byte[] item_picture; // int placeholder type
+	@Column(name="item_picture", length=10000, nullable=true)
+	private String item_picture;
 	
 	@Column(name="item_start_price", length=100, nullable=true)
 	private int item_start_price;
@@ -59,13 +61,12 @@ public class item {
 	
 	public item() {}
 	
-	public item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, byte[] item_picture, int item_start_price) {
+	public item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, int item_start_price) {
 		this.item_id = item_id;
 		this.item_user_id = item_user_id;
 		this.item_category = item_category;
 		this.item_name = item_name;
 		this.item_desc = item_desc;
-		this.item_picture = item_picture;
 		this.item_start_price = item_start_price;
 		this.item_last_bid_price = 0;
 		this.item_last_bid_time = "";
@@ -80,8 +81,8 @@ public class item {
     	this.item_user_id = item.getItemUserId();
     	this.item_category = item.getItemCategory();
     	this.item_name = item.getItemName();
-    	this.item_desc = item.getItemDescription();
     	this.item_picture = item.getItemPicture();
+    	this.item_desc = item.getItemDescription();
     	this.item_start_price = item.getItemStartingPrice();
     	this.item_last_bid_price = 0;
     	//Calendar c = Calendar.getInstance();
@@ -155,11 +156,11 @@ public class item {
 	}
 	
 	@JsonProperty("item_picture")
-	public byte[] getItemPicture() {
+	public String getItemPicture() {
 		return item_picture;
 	}
 
-	public void setItemPicture(byte[] item_picture) {
+	public void setItemPicture(String item_picture) {
 		this.item_picture = item_picture;
 	}
 
