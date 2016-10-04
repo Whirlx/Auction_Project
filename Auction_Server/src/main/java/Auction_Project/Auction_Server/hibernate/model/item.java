@@ -1,18 +1,12 @@
 package Auction_Project.Auction_Server.hibernate.model;
 
-import java.sql.Blob;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.NaturalId;
 
@@ -30,7 +24,7 @@ public class item {
 	
 	@Column(name="item_category", length=100, nullable=true)
 	private String item_category;
-	
+																		
 	@NaturalId
 	@Column(name="item_name", length=100, nullable=true)
 	private String item_name;
@@ -40,41 +34,32 @@ public class item {
 	
 	@Column(name="item_picture", length=10000, nullable=true)
 	private String item_picture;
-	
+
+	@Column(name="item_num_bids", length=100, nullable=true)
+	private int item_num_bids;
+
 	@Column(name="item_start_price", length=100, nullable=true)
 	private int item_start_price;
 	
-	@Column(name="item_last_bid_price", length=100, nullable=true)
-	private int item_last_bid_price;
+	@Column(name="item_latest_bid_price", length=100, nullable=true)
+	private int item_latest_bid_price;
 	
-	@Column(name="item_last_bid_time", length=100, nullable=true)
-	private String item_last_bid_time;
+	@Column(name="item_latest_bid_time", length=100, nullable=true)
+	private String item_latest_bid_time;
 	
-	@Column(name="item_last_bid_userid", length=100, nullable=true)
-	private int item_last_bid_userid;
+	@Column(name="item_latest_bid_userid", length=100, nullable=true)
+	private int item_latest_bid_userid;
 	
-	@Column(name="insert_time", length=100, nullable=true)
-	private String insert_time;
+	@Column(name="item_latest_bid_username", length=100, nullable=true)
+	private String item_latest_bid_username;
+
+	@Column(name="auction_start_time", length=100, nullable=true)
+	private String auction_start_time;
 	
-	@Column(name="update_time", length=100, nullable=true)
-	private String update_time;
+	@Column(name="duration_in_hours", length=100, nullable=true)
+	private int duration_in_hours;
 	
 	public item() {}
-	
-	public item(int item_id, int item_user_id, String item_category, String item_name, String item_desc, int item_start_price) {
-		this.item_id = item_id;
-		this.item_user_id = item_user_id;
-		this.item_category = item_category;
-		this.item_name = item_name;
-		this.item_desc = item_desc;
-		this.item_start_price = item_start_price;
-		this.item_last_bid_price = 0;
-		this.item_last_bid_time = "";
-		this.item_last_bid_userid = 0;
-		Calendar c = Calendar.getInstance();
-		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
-		this.update_time = this.insert_time;
-	}
 	
 	public item(item item) {
     	this.item_id = item.getItemID();
@@ -82,14 +67,15 @@ public class item {
     	this.item_category = item.getItemCategory();
     	this.item_name = item.getItemName();
     	this.item_picture = item.getItemPicture();
+    	this.item_num_bids = item.getItem_num_bids();
     	this.item_desc = item.getItemDescription();
     	this.item_start_price = item.getItemStartingPrice();
-    	this.item_last_bid_price = 0;
-    	//Calendar c = Calendar.getInstance();
-    	this.item_last_bid_time = item.getItem_last_bid_time();
-		this.item_last_bid_userid = item.getItem_last_bid_userid();
-		this.insert_time = item.getInsert_time();
-		this.update_time = item.getUpdate_time();
+    	this.item_latest_bid_price = item.getItemLatestBidPrice();
+    	this.item_latest_bid_time = item.getItem_latest_bid_time();
+		this.item_latest_bid_userid = item.getItem_latest_bid_userid();
+		this.item_latest_bid_username = item.getItem_latest_bid_username();
+		this.auction_start_time = item.getAuction_start_time();
+		this.duration_in_hours = item.getDuration_in_hours();
     }
 	
 	public String toString(){
@@ -101,11 +87,11 @@ public class item {
 				" item_desc:"  		+ this.getItemDescription() +
 				" item_picture:"	+ this.getItemPicture() +
 				" item_start_price:"			+ this.getItemStartingPrice() +
-				" item_last_bid_price:" + this.getItemLastBidPrice() +
-				" item_last_bid_time:" 	+ this.getItem_last_bid_time() +
-				" item_last_bid_userid:" 	+ this.getItemUserId() +
-				" insert_time:" 	+ this.getInsert_time() +
-				" update_time:" 	+ this.getUpdate_time() +
+				" item_latest_bid_price:" + this.getItemLatestBidPrice() +
+				" item_latest_bid_time:" 	+ this.getItem_latest_bid_time() +
+				" item_latest_bid_userid:" 	+ this.getItemUserId() +
+				" auction_start_time:" 	+ this.getAuction_start_time() +
+				" duration_in_hours:" 	+ this.getDuration_in_hours() +
 				"}";
 			
 	}
@@ -164,6 +150,15 @@ public class item {
 		this.item_picture = item_picture;
 	}
 
+	@JsonProperty("item_num_bids")
+	public int getItem_num_bids() {
+		return item_num_bids;
+	}
+
+	public void setItem_num_bids(int item_num_bids) {
+		this.item_num_bids = item_num_bids;
+	}
+	
 	@JsonProperty("item_start_price")
 	public int getItemStartingPrice() {
 		return item_start_price;
@@ -173,49 +168,58 @@ public class item {
 		this.item_start_price = item_start_price;
 	}
 
-	@JsonProperty("item_last_bid_price")
-	public int getItemLastBidPrice() {
-		return item_last_bid_price;
+	@JsonProperty("item_latest_bid_price")
+	public int getItemLatestBidPrice() {
+		return item_latest_bid_price;
 	}
 
-	public void setItemLastBidPrice(int item_last_bid_price) {
-		this.item_last_bid_price = item_last_bid_price;
+	public void setItemLatestBidPrice(int item_latest_bid_price) {
+		this.item_latest_bid_price = item_latest_bid_price;
 	}
 	
-	@JsonProperty("item_last_bid_time")
-	public String getItem_last_bid_time() {
-		return item_last_bid_time;
+	@JsonProperty("item_latest_bid_time")
+	public String getItem_latest_bid_time() {
+		return item_latest_bid_time;
 	}
 
-	public void setItem_last_bid_time(String item_last_bid_time) {
-		this.item_last_bid_time = item_last_bid_time;
+	public void setItem_latest_bid_time(String item_latest_bid_time) {
+		this.item_latest_bid_time = item_latest_bid_time;
 	}
 
-	@JsonProperty("item_last_bid_userid")
-	public int getItem_last_bid_userid() {
-		return item_last_bid_userid;
+	@JsonProperty("item_latest_bid_userid")
+	public int getItem_latest_bid_userid() {
+		return item_latest_bid_userid;
 	}
 
-	public void setItem_last_bid_userid(int item_last_bid_userid) {
-		this.item_last_bid_userid = item_last_bid_userid;
+	public void setItem_latest_bid_userid(int item_latest_bid_userid) {
+		this.item_latest_bid_userid = item_latest_bid_userid;
+	}
+	
+	@JsonProperty("item_latest_bid_username")
+	public String getItem_latest_bid_username() {
+		return item_latest_bid_username;
 	}
 
-	@JsonProperty("insert_time")
-	public String getInsert_time() {
-		return insert_time;
+	public void setItem_latest_bid_username(String item_latest_bid_username) {
+		this.item_latest_bid_username = item_latest_bid_username;
 	}
 
-	public void setInsert_time(String insert_time) {
-		this.insert_time = insert_time;
+	@JsonProperty("auction_start_time")
+	public String getAuction_start_time() {
+		return auction_start_time;
 	}
 
-	@JsonProperty("update_time")
-	public String getUpdate_time() {
-		return update_time;
+	public void setAuction_start_time(String auction_start_time) {
+		this.auction_start_time = auction_start_time;
 	}
 
-	public void setUpdate_time(String update_time) {
-		this.update_time = update_time;
+	@JsonProperty("duration_in_hours")
+	public int getDuration_in_hours() {
+		return duration_in_hours;
+	}
+
+	public void setDuration_in_hours(int duration_in_hours) {
+		this.duration_in_hours = duration_in_hours;
 	}
 	
 }

@@ -415,17 +415,17 @@ public class MessageHandler
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		int newBid = Integer.parseInt(price);
-		int oldBid = requestedItem.getItemLastBidPrice();
+		int oldBid = requestedItem.getItemLatestBidPrice();
 		int minBid = getMininumBid(oldBid);
 		if( newBid < minBid )
 		{
 			issueInvalidBidErrorMessage(issuedCommand, minBid);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		requestedItem.setItemLastBidPrice(newBid);
+		requestedItem.setItemLatestBidPrice(newBid);
 		item_impl.updateItem(requestedItem);
 		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(this.sessionFactory);
-		auctionBidTransactions bid_trx = new auctionBidTransactions(userToAuth.getUserId(), requestedItem.getItemID(), requestedItem.getItemLastBidPrice());
+		auctionBidTransactions bid_trx = new auctionBidTransactions(userToAuth.getUserId(), requestedItem.getItemID(), requestedItem.getItemLatestBidPrice());
 		trx_impl.addAuctionBidTransaction(bid_trx);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(message)).build(); // Success

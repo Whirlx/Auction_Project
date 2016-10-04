@@ -1,19 +1,13 @@
 package Auction_Project.Auction_Server.hibernate.model;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
 import javax.persistence.UniqueConstraint;
-
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.hibernate.type.TimestampType;
 
 @Entity
 @Table(name="auction_bid_transactions", uniqueConstraints={@UniqueConstraint(columnNames={"user_id"})})
@@ -23,7 +17,7 @@ public class auctionBidTransactions {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="auc_bid_trx_id", nullable=false, unique=true, length=11)
 	private int auc_bid_trx_id;
-	
+
 	@Column(name="user_id", nullable=false, unique=true, length=11)
 	private int user_id;
 	
@@ -39,26 +33,15 @@ public class auctionBidTransactions {
 	@Column(name="insert_time", length=100, nullable=true)
 	private String insert_time;
 	
-	@Column(name="update_time", length=100, nullable=true)
-	private String update_time;
-	
-	
 	public auctionBidTransactions() {}
 	
-	public auctionBidTransactions(int user_id, int  item_id ,String  item_bid_time ,long item_bid_price) {
-		//this.item_category_id = item_category_id;
-		//this.item_category_name = item_category_name;
-		Calendar c = Calendar.getInstance();
-		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
-		this.update_time = this.insert_time;
-	}
-	
 	public auctionBidTransactions(auctionBidTransactions auc_bid_trx) {
-    	//this.item_category_id = auc_bid_trx();
-    	//this.item_category_name = auc_bid_trx.getItemCategoryName();
-    	Calendar c = Calendar.getInstance();
-		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
-		this.update_time = this.insert_time;
+    	this.auc_bid_trx_id = auc_bid_trx.getAuc_bid_trx_id();
+    	this.user_id = auc_bid_trx.getUser_id();
+    	this.item_id = auc_bid_trx.getItem_id();
+    	this.item_bid_time = auc_bid_trx.getItem_bid_time();
+    	this.item_bid_price = auc_bid_trx.getitem_bid_price();
+    	this.insert_time = auc_bid_trx.getInsert_time();
     }
 
 	public auctionBidTransactions(int userId, int itemID, int itemLastBidPrice) {
@@ -67,6 +50,15 @@ public class auctionBidTransactions {
 		this.item_bid_price = itemLastBidPrice;
 	}
 
+	@JsonProperty("auc_bid_trx_id")
+	public int getAuc_bid_trx_id() {
+		return auc_bid_trx_id;
+	}
+
+	public void setAuc_bid_trx_id(int auc_bid_trx_id) {
+		this.auc_bid_trx_id = auc_bid_trx_id;
+	}
+	
 	@JsonProperty("user_id")
 	public int getUser_id() {
 		return user_id;
@@ -113,15 +105,5 @@ public class auctionBidTransactions {
 	public void setInsert_time(String insert_time) {
 		this.insert_time = insert_time;
 	}
-
-	@JsonProperty("update_time")
-	public String getUpdate_time() {
-		return update_time;
-	}
-
-	public void setUpdate_time(String update_time) {
-		this.update_time = update_time;
-	}
-	
 	
 }

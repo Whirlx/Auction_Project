@@ -1,9 +1,5 @@
 package Auction_Project.Auction_Server.hibernate.model;
 
-//http://stackoverflow.com/questions/221611/creation-timestamp-and-last-update-timestamp-with-hibernate-and-mysql
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import org.codehaus.jackson.annotate.JsonProperty;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,25 +45,8 @@ public class user {
 	
 	@Column(name="insert_time", length=100, nullable=true)
     private String insert_time;
-	
-	@Column(name="update_time", length=100, nullable=true)
-    private String update_time;
      
     public user() {}
-    
-    public user(int user_id, String user_name, String user_pwd, String first_name, String last_name, String phone_number, String email) {
-    	this.user_id = user_id;
-    	this.user_name = user_name;
-    	this.user_pwd = user_pwd;
-    	this.first_name = first_name;
-    	this.last_name = last_name;
-    	this.phone_number = phone_number;
-    	this.email = email;
-    	Calendar c = Calendar.getInstance();
-		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
-		this.last_login_time = this.insert_time;
-		this.update_time = this.insert_time;
-    }
     
     public user(user user) {
     	this.user_id = user.getUserId();
@@ -77,10 +56,8 @@ public class user {
     	this.last_name = user.getLastName();
     	this.phone_number = user.getPhoneNumber();
     	this.email = user.getEmail();
-    	Calendar c = Calendar.getInstance();
-		this.insert_time = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(c.getTime()); // Set the start date to local time
-		this.last_login_time = this.insert_time;
-		this.update_time = this.insert_time;
+		this.last_login_time = user.getLast_login_time();
+		this.insert_time = user.getInsert_time();
     }
     
     public String toString(){
@@ -94,7 +71,6 @@ public class user {
 				" email:"			+ this.getEmail() +
 				" last_login_time:" + this.getLast_login_time() +
 				" insert_time:" 	+ this.getInsert_time() +
-				" update_time:" 	+ this.getUpdate_time() +
 				"}";
 			
 	}
@@ -178,15 +154,6 @@ public class user {
 
 	public void setInsert_time(String insert_time) {
 		this.insert_time = insert_time;
-	}
-
-	@JsonProperty("update_time")
-	public String getUpdate_time() {
-		return update_time;
-	}
-
-	public void setUpdate_time(String update_time) {
-		this.update_time = update_time;
 	}
      
 }
