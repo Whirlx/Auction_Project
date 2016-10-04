@@ -66,7 +66,7 @@ public class itemImpl implements itemInterface
 	public List<item> listItems() {
 		Session session = this.sessionFactory.getCurrentSession();
 		Transaction tx = session.beginTransaction();
-		List<item> itemsList = session.createQuery("from item").list();
+		List<item> itemsList = session.createQuery("FROM item i ORDER BY i.item_category DESC").list();
 		for(item u : itemsList)
 		{
 			logger.info("item List::"+u.toString());

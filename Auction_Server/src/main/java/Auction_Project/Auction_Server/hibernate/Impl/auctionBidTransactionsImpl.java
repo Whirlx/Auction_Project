@@ -66,7 +66,11 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 		List<auctionBidTransactions> transactionsListForUser = session.createQuery("from auctionBidTransactions where user_id = "+user_id).list();
 		for(auctionBidTransactions u : transactionsListForUser)
 		{
-			participatedItemIDsList.add(u.getItem_id());
+			int itemId = u.getItem_id();
+			if( participatedItemIDsList.contains(itemId) == false )
+			{
+				participatedItemIDsList.add(itemId);
+			}
 		}
 		tx.commit();
 		return participatedItemIDsList;

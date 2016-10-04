@@ -53,6 +53,7 @@ import sun.misc.BASE64Decoder;
 public class MessageHandler 
 {
 	public static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
+	private SessionFactory sessionFactory = HibernateUtil.getSessionAnnotationFactory();
 	private String userIP;
 	private String message;
 	private String userName;
@@ -86,8 +87,7 @@ public class MessageHandler
 		this.userIP = request.getRemoteAddr();
 		user newUser = new user(inputUser);
 		this.userName = newUser.getUserName();
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		if( user_impl.getUserByName(newUser.getUserName()) != null)
 		{
 			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
@@ -113,8 +113,7 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
@@ -147,12 +146,16 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		if( userToAuth.getUserId() != 0 ) // Not admin
+		{
+			issueAccessDeniedErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		issueSuccessMessage(issuedCommand);
@@ -174,8 +177,7 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
@@ -186,6 +188,11 @@ public class MessageHandler
 		if( user_impl.getUserByName(requestedUserName) == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		if( userToAuth.getUserId() != 0 ) // Not admin
+		{
+			issueAccessDeniedErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		user_impl.removeUser(user_impl.getUserByName(requestedUserName).getUserId());
@@ -208,8 +215,7 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false)
 		{
@@ -217,12 +223,20 @@ public class MessageHandler
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		user requestedUser = user_impl.getUserByName(requestedUserName);
 		if( requestedUser == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		if( requestedUserName.equals(userToAuth.getUserName()) ) // If checking a different users' auctions
+		{
+			if( userToAuth.getUserId() != 0 ) // Not admin
+			{
+				issueAccessDeniedErrorMessage(issuedCommand);
+				return Response.status(400).entity(toJsonString(message)).build(); // Failure
+			}
 		}
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(item_impl.listItemsForUserId(requestedUser.getUserId()))).build(); // Success
@@ -244,8 +258,7 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
@@ -258,8 +271,16 @@ public class MessageHandler
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		if( requestedUserName.equals(userToAuth.getUserName()) ) // If checking a different users' auctions
+		{
+			if( userToAuth.getUserId() != 0 ) // Not admin
+			{
+				issueAccessDeniedErrorMessage(issuedCommand);
+				return Response.status(400).entity(toJsonString(message)).build(); // Failure
+			}
+		}
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(this.sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		List<Integer> participatedItemIDsList = trx_impl.listParticipatedItemIDsForUserByUserID(requestedUser.getUserId());
 		List<item> participatedItemsList = new ArrayList<item>();
 		for(Integer i : participatedItemIDsList)
@@ -285,15 +306,14 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(item_impl.listItems())).build(); // Success
     }
@@ -313,21 +333,20 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(this.sessionFactory);
 		if( item_category_impl.getItemCategoryByName(requestedItemCategory) == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(item_impl.listItemsByCategoryName(requestedItemCategory))).build(); // Success
     }
@@ -347,15 +366,14 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		item requestedItem = item_impl.getItemByName(requestedItemName);
 		if(requestedItem == null)
 		{
@@ -382,24 +400,31 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		item requestedItem = item_impl.getItemByName(requestedItemName);
 		if(requestedItem == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		requestedItem.setItemLastBidPrice(Integer.parseInt(price));
+		int newBid = Integer.parseInt(price);
+		int oldBid = requestedItem.getItemLastBidPrice();
+		int minBid = getMininumBid(oldBid);
+		if( newBid < minBid )
+		{
+			issueInvalidBidErrorMessage(issuedCommand, minBid);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		requestedItem.setItemLastBidPrice(newBid);
 		item_impl.updateItem(requestedItem);
-		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(this.sessionFactory);
 		auctionBidTransactions bid_trx = new auctionBidTransactions(userToAuth.getUserId(), requestedItem.getItemID(), requestedItem.getItemLastBidPrice());
 		trx_impl.addAuctionBidTransaction(bid_trx);
 		issueSuccessMessage(issuedCommand);
@@ -422,8 +447,7 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
@@ -431,7 +455,7 @@ public class MessageHandler
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		item newItem = new item(inputItem);
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		if( item_impl.getItemByName(newItem.getItemName()) != null)
 		{
 			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
@@ -456,15 +480,14 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(this.sessionFactory);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(item_category_impl.listItemCategories())).build(); // Success
     }
@@ -485,16 +508,20 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
+		if( userToAuth.getUserId() != 0 ) // Not admin
+		{
+			issueAccessDeniedErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
 		itemCategory newItemCategory = new itemCategory(category_name);
-		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(this.sessionFactory);
 		if( item_category_impl.getItemCategoryByName(category_name) != null)
 		{
 			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
@@ -520,15 +547,19 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemCategoryImpl item_category_impl = new itemCategoryImpl(sessionFactory);
+		if( userToAuth.getUserId() != 0 ) // Not admin
+		{
+			issueAccessDeniedErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		itemCategoryImpl item_category_impl = new itemCategoryImpl(this.sessionFactory);
 		if( item_category_impl.getItemCategoryByName(requestedItemCategory) == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
@@ -553,15 +584,19 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		if( userToAuth.getUserId() != 0 ) // Not admin
+		{
+			issueAccessDeniedErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(this.sessionFactory);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(trx_impl.listAuctionBidTransactions())).build(); // Success
     }
@@ -581,22 +616,21 @@ public class MessageHandler
 			issueHeaderErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		SessionFactory sessionFactory=HibernateUtil.getSessionAnnotationFactory();
-		userImpl user_impl = new userImpl(sessionFactory);
+		userImpl user_impl = new userImpl(this.sessionFactory);
 		user userToAuth = user_impl.getUserByName(userName);
 		if( isAuthentic(userToAuth, password) == false )
 		{
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		itemImpl item_impl = new itemImpl(sessionFactory);
+		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		item requestedItem = item_impl.getItemByName(requestedItemName);
 		if(requestedItem == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(sessionFactory);
+		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(this.sessionFactory);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(trx_impl.listAuctionBidTransactionsForItemById(requestedItem.getItemID()))).build(); // Success
     }
@@ -663,6 +697,17 @@ public class MessageHandler
 		return true;
 	}
 	
+	private int getMininumBid(int oldBid)
+	{
+		int minBid;
+		if( oldBid < 100 ) minBid = oldBid + 5;
+		else if( 100 <= oldBid && (oldBid < 1000) ) minBid = oldBid + 10;
+		else if( 1000 <= oldBid && (oldBid < 10000) ) minBid = oldBid + 100;
+		else if( 10000 <= oldBid && (oldBid < 100000) ) minBid = oldBid + 1000;
+		else minBid = oldBid + 10000;
+		return minBid;
+	}
+	
 	private void issueWelcomeMessage(String welcomeMessage)
 	{
 		this.message = welcomeMessage;
@@ -696,6 +741,18 @@ public class MessageHandler
 	private void issueEntityExistsErrorMessage(String issuedCommand, String requestedEntity)
 	{
 		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, "+requestedEntity+" already exists.";
+		logger.warning(message);
+	}
+	
+	private void issueAccessDeniedErrorMessage(String issuedCommand)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, access denied.";
+		logger.warning(message);
+	}
+	
+	private void issueInvalidBidErrorMessage(String issuedCommand, int minBid)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, bid is too low (must be "+minBid+"+).";
 		logger.warning(message);
 	}
 	

@@ -51,9 +51,8 @@ public class itemCategory {
 	
 	public itemCategory(String item_category_name) {
 		this.item_category_name = item_category_name;
-		
 	}
-
+	
 	@JsonProperty("item_category_id")
 	public int getItemCategoryID() {
 		return item_category_id;
