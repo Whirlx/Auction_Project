@@ -17,8 +17,6 @@ public class HibernateUtil {
 	//Annotation based configuration
 	private static SessionFactory sessionAnnotationFactory;
 	private static String HIBERNATE_CONFIG_FILE="hibernate.cfg.xml";
-
-	
 	
     private static SessionFactory buildSessionAnnotationFactory()
     {
@@ -55,7 +53,6 @@ public class HibernateUtil {
 		else{
 			logger.info("SessionFactory already exists !!! ");
 		}
-		
 		return sessionAnnotationFactory;
     }
 	
