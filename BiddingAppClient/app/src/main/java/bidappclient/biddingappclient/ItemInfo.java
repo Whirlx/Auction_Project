@@ -4,46 +4,51 @@ package bidappclient.biddingappclient;
  * Created by user on 28/08/2016.
  */
 public class ItemInfo {
-    private String itemCategory;
-    private String itemName;
-    private int startingPrice;
-    private int lastingTime;
-    private String description;
+    private String item_category;
+    private String item_name;
+    private int item_start_price;
+    //private int lastingTime;
+    private String item_desc;
 
-    public ItemInfo (String name, int bid, int time, String des)
-    {
-        itemName = name;
-        startingPrice = bid;
-        lastingTime = time;
-        description = des;
-    }
+//    public ItemInfo (String name, int bid, int time, String des)
+//    {
+//        item_name = name;
+//        item_start_price = bid;
+//        //lastingTime = time;
+//        item_desc = des;
+//    }
 
-    public ItemInfo (String category, String name, String des, int bid, int time)
+    public ItemInfo (String category, String name, String des, int bid) // another argument shold be - int time (how many days will the bid last)
     {
-        itemCategory = category;
-        itemName = name;
-        startingPrice = bid;
-        lastingTime = time;
-        description = des;
+        item_category = category;
+        item_name = name;
+        item_start_price = bid;
+        //lastingTime = time;
+        item_desc = des;
     }
 
     public String getName()
     {
-        return itemName;
+        return item_name;
+    }
+
+    public String getItemCategory()
+    {
+        return item_category;
     }
 
     public int getStartingPrice()
     {
-        return startingPrice;
+        return item_start_price;
     }
 
-    public int getLastingTime()
-    {
-        return lastingTime;
-    }
+//    public int getLastingTime()
+//    {
+//        return lastingTime;
+//    }
 
     public String getDescription()
     {
-        return description;
+        return item_desc;
     }
 }

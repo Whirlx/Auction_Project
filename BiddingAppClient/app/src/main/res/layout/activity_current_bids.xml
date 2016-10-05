@@ -12,6 +12,9 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/listViewId"></ListView>
+        android:id="@+id/currentBidsListView"
+        android:dividerHeight="3dp"
+        android:background="#000000"
+        android:divider="#ffffff"></ListView>
 
 </RelativeLayout>

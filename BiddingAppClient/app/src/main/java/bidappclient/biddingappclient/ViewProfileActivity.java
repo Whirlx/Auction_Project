@@ -3,7 +3,7 @@ package bidappclient.biddingappclient;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class ViewProfileActivity extends AppCompatActivity {
+public class ViewProfileActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

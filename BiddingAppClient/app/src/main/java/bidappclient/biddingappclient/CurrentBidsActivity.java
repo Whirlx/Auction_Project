@@ -1,4 +1,5 @@
 package bidappclient.biddingappclient;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,67 +15,97 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 
-public class CurrentBidsActivity extends AppCompatActivity {
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import cz.msebera.android.httpclient.Header;
 
 
-    private ArrayList<AuctionInfo> bidsInfoAL;
-    private String itemId; // **************** just pass through method
-    private String currentBid; // **************** just pass through method
+public class CurrentBidsActivity extends BaseActivity {
 
+    private ArrayList<JSONObject> jsonList;
+    private String currentBid = "", itemName = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_current_bids);
-
-
-        //send server request to receive all item bids.
-        //receive json with all information. item id, item name, last bid price, last bid time, lasting auction time.
-        //process info and enter into array:
-
-        /*
-        bidsInfoAL = new ArrayList<AuctionInfo>();
-        ArrayList<String> displayInfoAL = new ArrayList<String>();
-        for (int i = 0; i < bidsInfoAL.size(); i++){
-            displayInfoAL.add("Item ID: " + bidsInfoAL.get(i).getItemId() + "   Item Name: " + bidsInfoAL.get(i).getItemName() +
-            "   Current Bid: " + bidsInfoAL.get(i).getLastBidPrice() + "   Last Bid Time: " + bidsInfoAL.get(i).getTimeOfLastBid() + "   Remaining Time: " + bidsInfoAL.get(i).getRemainingAuctionTime()
-            + "   Bid Made By: ");
-        }
-
-        String[] auctionInfosToDisplay = new String[displayInfoAL.size()];
-        auctionInfosToDisplay = displayInfoAL.toArray(auctionInfosToDisplay);
-        ListAdapter auctionsInfoAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, auctionInfosToDisplay);
-        ListView auctionsInfoListView = (ListView) findViewById(R.id.listViewId); // *************** IMPORTANT CHANGE ID *********************
-        auctionsInfoListView.setAdapter(auctionsInfoAdapter);
-
-        auctionsInfoListView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener(){
+        ListView myCurrentBidsListView = (ListView) findViewById(R.id.currentBidsListView);
+        myCurrentBidsListView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        AuctionInfo bidInfoChosen = bidsInfoAL.get(position);
-                        currentBid = bidInfoChosen.getLastBidPrice();
-                        itemId = bidInfoChosen.getItemId();
-                        //String itemChosen = String.valueOf(parent.getItemAtPosition(position));
-                        // here send to new screen with the id, ask how much would u like to bid, and send to server.
-                        //Toast.makeText(ListOfSearchActivity.this, itemChosen, Toast.LENGTH_LONG).show();
+                        try {
+                            itemName = jsonList.get(position).get("item_name").toString();
+                            currentBid = jsonList.get(position).get("item_last_bid_price").toString();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println ("#############" + itemName + "#######" +currentBid );
+                        Intent i = new Intent(getApplicationContext(), PlaceNewBidActivity.class);
+                        i.putExtra("currentbid", currentBid);
+                        i.putExtra("itemname", itemName);
+                        startActivity(i);
                     }
                 }
         );
+        invokeViewMyOwnBidsRequest();
+    }
 
-        Intent i = new Intent (this, PlaceNewBidActivity.class);
-        i.putExtra ("currentbid", currentBid);
-        i.putExtra ("itemid", itemId);
-        startActivity(i);
-       */
 
-        String[] items = {"Item ID: blergh machine" + "   Current Bid: 50$   Time Left: 7 hours   Picture:",
-                "Item ID: blerb machine" + "   Current Bid: 43$   Time Left: 7 hours   Picture:",
-                "Item ID: flang" + "   Current Bid: 41$   Time Left: 4 hours   Picture:",
-                "Item ID: bamba" + "   Current Bid: 52$   Time Left: 3 hours   Picture:",
-                "Item: ID: charmander" + "   Current Bid: 33$   Time Left: 9 hours   Picture:"};
-        ListAdapter itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-        ListView itemListView = (ListView) findViewById(R.id.listViewId);
-        itemListView.setAdapter(itemsAdapter);
 
+
+
+    public void invokeViewMyOwnBidsRequest()
+    {
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setBasicAuth(globalUsername, globalPassword);
+        client.get("http://" + globalURL + "/Auction_Server/users/" + globalUsername + "/auctions", new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                try {
+                    String response = new String(bytes, "UTF-8");
+                    System.out.println("@@@@@@" + response);
+                    JSONArray jsonArray = new JSONArray(response);
+                    jsonList = new ArrayList<JSONObject>();
+                    for (int j = 0; j < jsonArray.length(); j++)
+                        jsonList.add(jsonArray.getJSONObject(j));
+                    ArrayList<String> searchedItemResultsAL = new ArrayList<String>();
+                    for (int j = 0; j < jsonList.size(); j++) {
+                        try {
+                            searchedItemResultsAL.add("Item Name: " + jsonList.get(j).get("item_name") + "\nItem Description: " + jsonList.get(j).get("item_desc") +
+                            "\nCategory: " + jsonList.get(j).get("item_category") + "\nCurrent Bid: " + jsonList.get(j).get("item_latest_bid_price") +
+                            "\nNStarting price: " + jsonList.get(j).get("item_start_price") + "\nNumber of Bids: " + jsonList.get(j).get("item_num_bids") +
+                            "\nLatest bid username: " + jsonList.get(j).get("item_latest_bid_username") + "\nLast Bid Time: " + jsonList.get(j).get("item_latest_bid_time"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    ListAdapter usersAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, searchedItemResultsAL); // android.R.layout.simple_list_item_1
+                    ListView itemListView = (ListView) findViewById(R.id.currentBidsListView);
+                    itemListView.setAdapter(usersAdapter);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable)
+            {
+                String response = "";
+                try {
+                    response = new String(bytes, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+            }
+
+        });
     }
 }

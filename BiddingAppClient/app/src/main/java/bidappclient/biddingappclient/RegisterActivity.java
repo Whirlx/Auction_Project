@@ -11,16 +11,25 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RegisterActivity extends AppCompatActivity {
+import java.io.UnsupportedEncodingException;
+
+import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.HttpEntity;
+import cz.msebera.android.httpclient.entity.StringEntity;
+
+public class RegisterActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
     }
 
-    public void onClickSubmitRegistration(View view){
+    public void onClickSubmitRegistration(View view) throws JSONException, UnsupportedEncodingException {
         TextView usernameTextView = (TextView) findViewById(R.id.RegisterUsernameId);
         String usernameString = usernameTextView.getText().toString();
         TextView passwordStringTextView = (TextView) findViewById(R.id.RegisterPasswordId);
@@ -41,11 +50,28 @@ public class RegisterActivity extends AppCompatActivity {
         String phoneString = phoneStringTextView.getText().toString();
         TextView emailStringTextView = (TextView) findViewById(R.id.RegisterEmailId);
         String emailString = emailStringTextView.getText().toString();
-        User newRegisteredUser = new User (usernameString, passwordString, firstnameString, lastnameString, phoneString, emailString);
-        Gson gson = new Gson();
-        String registerUserJson = gson.toJson(newRegisteredUser);
-        System.out.println(registerUserJson);
-        //invokeRegistrationRequest(registerUserJson);
+//        User newRegisteredUser = new User (usernameString, passwordString, firstnameString, lastnameString, phoneString, emailString);
+//        Gson gson = new Gson();
+//        String registerUserJson = gson.toJson(newRegisteredUser);
+//        System.out.println(registerUserJson);
+
+//        RequestParams params = new RequestParams();
+//        params.put("user_name", usernameString);
+//        params.put("user_pwd", passwordString);
+//        params.put("first_name", firstnameString);
+//        params.put("last_name", lastnameString);
+//        params.put("phone_number", phoneString);
+//        params.put("email", emailString);
+//        params.setUseJsonStreamer(true);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("user_name", usernameString);
+        jsonObject.put("user_pwd", passwordString);
+        jsonObject.put("first_name", firstnameString);
+        jsonObject.put("last_name", lastnameString);
+        jsonObject.put("phone_number", phoneString);
+        jsonObject.put("email", emailString);
+        invokeRegistrationRequest(jsonObject);
 
         //Toast.makeText(RegisterActivity.this, (usernameString+passwordString+firstnameString+lastnameString+phoneString+emailString), Toast.LENGTH_LONG).show();
 
@@ -55,33 +81,45 @@ public class RegisterActivity extends AppCompatActivity {
         //startActivity(i);
     }
 
-    public void invokeRegistrationRequest(String registerUserJson){
+    public void invokeRegistrationRequest(final JSONObject jsonObject) throws UnsupportedEncodingException {
         // Show Progress Dialog
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://localhost:8080/Auction_Server/register", new AsyncHttpResponseHandler() { // need to add the json to the send request
-            //should be like this: client.post(context, restApiUrl, entity, "application/json", responseHandler);
+        StringEntity entity = new StringEntity(jsonObject.toString());
 
-            // When the response returned by REST has Http response code '200'
+        client.post(getApplicationContext(), "http://" + globalURL + "/Auction_Server/register", entity, "application/json", new AsyncHttpResponseHandler() {
             @Override
-            public void onSuccess(String response) {
-                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-                navigateToMainScreenActivity("firstname123", "lastname123"); // need to take first and last name from the json registerUserJson
+            public void onSuccess(int i, Header[] headers, byte[] bytes){
+                try {
+                    String response = new String(bytes, "UTF-8");
+                    globalUsername = jsonObject.get("user_name").toString();
+                    globalPassword = jsonObject.get("user_pwd").toString();
+                    globalFirstName = jsonObject.get("first_name").toString();
+                    globalLastName = jsonObject.get("last_name").toString();
+                    Toast.makeText(RegisterActivity.this, response, Toast.LENGTH_LONG).show();
+                    navigateToMainScreenActivity(); // need to take first and last name from the json registerUserJson
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
             }
 
-
-
             @Override
-            public void onFailure(Throwable e) {
-                Toast.makeText(getApplicationContext(), "Something went wrong with registration.", Toast.LENGTH_LONG).show();
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                System.out.println("@@@@@@@@@@@@"+i);
+                String response = "";
+                try {
+                    response = new String(bytes, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    public void navigateToMainScreenActivity(String firstName, String lastName)
+    public void navigateToMainScreenActivity()
     {
         Intent i = new Intent (this, MainUserScreenActivity.class);
-        i.putExtra("firstname", firstName);
-        i.putExtra("lastname", lastName);
         startActivity(i);
     }
 

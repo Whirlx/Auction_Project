@@ -116,38 +116,39 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="add"
-        android:id="@+id/pictureButtonAddId"
+        android:id="@+id/addPictureButtonId"
         android:layout_below="@+id/descriptionAddId"
         android:layout_toRightOf="@+id/textView7"
-        android:layout_toEndOf="@+id/textView7" />
+        android:layout_toEndOf="@+id/textView7"
+        android:onClick="onClickAddPicture"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Submit Item"
         android:id="@+id/submitAddId"
-        android:layout_below="@+id/pictureButtonAddId"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="92dp"
-        android:onClick="onClickSubmitItem"/>
+        android:onClick="onClickSubmitItem"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/itemPictureImageViewId"
+        android:minHeight="120dp"
+        android:minWidth="200dp"
+        android:layout_below="@+id/textView21"
+        android:layout_toRightOf="@+id/textView6"
+        android:layout_toEndOf="@+id/textView6" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Category: "
+        android:text="Picture Preview (if taken):"
         android:id="@+id/textView21"
-        android:layout_below="@+id/pictureButtonAddId"
+        android:layout_below="@+id/addPictureButtonId"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/AddItemCategoryId"
-        android:layout_centerVertical="true"
-        android:layout_alignRight="@+id/descriptionAddId"
-        android:layout_alignEnd="@+id/descriptionAddId"
-        android:layout_toRightOf="@+id/textView21"
-        android:layout_toEndOf="@+id/textView21" />
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp" />
 
 </RelativeLayout>

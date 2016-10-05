@@ -1,10 +1,12 @@
 package bidappclient.biddingappclient;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
-
+import Decoder.BASE64Encoder;
 //import javax.ws.rs.client.Client;
 //import javax.ws.rs.client.ClientBuilder;
 //import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -87,7 +89,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
     // Progress Dialog Object
     ProgressDialog prgDialog;
     // Error Msg TextView Object
@@ -102,7 +104,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         // Instantiate Progress Dialog object
         prgDialog = new ProgressDialog(this);
         // Set Progress Dialog Text
@@ -110,7 +111,6 @@ public class LoginActivity extends AppCompatActivity {
         // Set Cancelable as False
         prgDialog.setCancelable(false);
         invokeWelcomeServerMessage();
-
         userInput = (EditText) findViewById(R.id.usernameEditText);
         passwordInput = (EditText) findViewById(R.id.passwordEditText);
     }
@@ -120,11 +120,14 @@ public class LoginActivity extends AppCompatActivity {
         String passwordString = passwordInput.getText().toString();
         //System.out.println ( userString + "    " + passwordString );
         // Instantiate Http Request Param Object
-        RequestParams params = new RequestParams(); // not really needed for now.
-        params.put("username", userString);
-        params.put("password", passwordString);
+//        RequestParams params = new RequestParams(); // not really needed for now.
+//        params.put("username", userString);
+//        params.put("password", passwordString);
+//        String authString = userString + ":" + passwordString;
+//        String authStringEnc = new BASE64Encoder().encode(authString.getBytes());
         //invokeLoginRequest(params);
-        invokeLoginRequest(userString, passwordString);
+        invokeLoginRequest(userString, userString, passwordString);
+
 
         /*
         Intent i = new Intent (this, MainUserScreenActivity.class);
@@ -135,110 +138,110 @@ public class LoginActivity extends AppCompatActivity {
         */
     }
 
-    public void invokeLoginRequest(String username, String password){
+    public void invokeLoginRequest(String requestedUser, String userString, String password) {
         // Show Progress Dialog
         prgDialog.show();
         // Make RESTful webservice call using AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
+        client.setBasicAuth(userString, password);
         //String address = "http://10.0.2.2:8080/Auction_Server/users/2/?username=" + username + "&password=" + password;
-        //System.out.println (address);
-        client.get("http://10.0.2.2:8080/Auction_Server/users/2/?username=" + username + "&password=" + password, new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
-            @Override
-            public void onSuccess(String response) {
-                // Hide Progress Dialog
-                prgDialog.hide();
-                    try {
-                        // JSON Object
-                        System.out.println(response);
-                        /*
-                        String parsedJson = response.replace("\\" , "");
-                        System.out.println(parsedJson);
-                        StringBuilder sb = new StringBuilder(parsedJson);
-                        sb.deleteCharAt(0);
-                        sb.deleteCharAt(sb.length()-1);
-                        parsedJson = sb.toString();
-                        System.out.println(parsedJson);
-                        */
-                        JSONObject obj = new JSONObject(response);
-                        String greeting = "Logged in successfully\nWelcome " + obj.get("first_name") + " " + obj.get("last_name") + "!";
-                        Toast.makeText(LoginActivity.this, greeting, Toast.LENGTH_LONG).show();
-                        navigateToMainScreenActivity(obj.get("first_name").toString(), obj.get("last_name").toString());
-                        //System.out.println (obj.get("first_name"));
-                        // Navigate to Home screen
-                        //navigatetoHomeActivity();
-                    } catch (JSONException e) {
-                        // TODO Auto-generated catch block
-                        Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-                    }
-                }
-
-
+        client.get("http://" + globalURL + "/Auction_Server/users/" + requestedUser, new AsyncHttpResponseHandler() { // deleted params
 
             @Override
-            public void onFailure(Throwable e) {
-                //super.onFailure(throwable, headers, errorResponse);
+            public void onSuccess(int i, Header[] headers, byte[] bytes) {
                 // Hide Progress Dialog
                 prgDialog.hide();
-
-                /*
-                // When Http response code is '404'
-                if(statusCode == 404){
-                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                try {
+                    String response = new String(bytes, "UTF-8");
+                    System.out.println("@@@@@@" + response);
+                    JSONObject obj = new JSONObject(response);
+                    String greeting = "Logged in successfully\nWelcome " + obj.get("first_name") + " " + obj.get("last_name") + "!";
+                    globalUsername = obj.get("user_name").toString();
+                    globalPassword = obj.get("user_pwd").toString();
+                    String firstName = obj.get("first_name").toString();
+                    String lastName = obj.get("last_name").toString();
+                    String phoneNumber = obj.get("phone_number").toString();
+                    String email = obj.get("email").toString();
+                    String creationDate = obj.get("insert_time").toString();
+                    Toast.makeText(LoginActivity.this, greeting, Toast.LENGTH_LONG).show();
+                    navigateToMainScreenActivity(firstName, lastName, phoneNumber, email, creationDate);
+                    //System.out.println (obj.get("first_name"));
+                    // Navigate to Home screen
+                    //navigatetoHomeActivity();
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
                 }
-                // When Http response code is '500'
-                else if(statusCode == 500){
-                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code other than 404, 500
-                */
-
-                //else{
-                Toast.makeText(getApplicationContext(), "Wrong username or password! failed authentication.", Toast.LENGTH_LONG).show();
-                //}
             }
 
-
+            @Override
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                String response = "";
+                try {
+                    response = new String(bytes, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
+            }
 
         });
     }
 
-    public void onClickPopupMessage (View view)
-    {
+    public void onClickPopupMessage(View view) {
         invokeWelcomeServerMessage();
     }
 
-
-
-    public void invokeWelcomeServerMessage()
+    public void onClickChangeIP(View view)
     {
+        Intent i = new Intent(this, ChangeIPActivity.class);
+        startActivity(i);
+    }
+
+
+    public void invokeWelcomeServerMessage() {
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://10.0.2.2:8080/Auction_Server/" ,new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
+        client.get("http://" + globalURL + "/Auction_Server/", new AsyncHttpResponseHandler() {
             @Override
-            public void onSuccess(String response) {
+            public void onSuccess(int i, Header[] headers, byte[] bytes) {
+                String response = null;
+                try {
+                    response = new String(bytes, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(LoginActivity.this, response, Toast.LENGTH_LONG).show();
             }
+
+            @Override
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+
+            }
+
         });
     }
 
 
-
-
-    public void onClickRegister(View view){
-        Intent i = new Intent (this, RegisterActivity.class);
+    public void onClickRegister(View view) {
+        Intent i = new Intent(this, RegisterActivity.class);
         startActivity(i);
     }
 
-    public void navigateToMainScreenActivity(String firstName, String lastName)
-    {
-        Intent i = new Intent (this, MainUserScreenActivity.class);
+    public void navigateToMainScreenActivity(String firstName, String lastName, String phoneNumber, String email, String creationDate) {
+        Intent i = new Intent(this, MainUserScreenActivity.class);
         i.putExtra("firstname", firstName);
         i.putExtra("lastname", lastName);
+        i.putExtra("phonenumber", phoneNumber);
+        i.putExtra("email", email);
+        i.putExtra("creationdate", creationDate);
         startActivity(i);
     }
 
+    public void navigateToMainScreenActivity() {
+        Intent i = new Intent(this, MainUserScreenActivity.class);
+        startActivity(i);
+    }
 }
 
 

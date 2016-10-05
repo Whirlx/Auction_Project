@@ -19,7 +19,7 @@ import org.apache.http.util.EntityUtils;
 
 
 
-public class SearchingItemActivity extends AppCompatActivity {
+public class SearchingItemActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

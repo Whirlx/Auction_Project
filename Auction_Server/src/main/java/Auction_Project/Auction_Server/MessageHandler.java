@@ -455,6 +455,7 @@ public class MessageHandler
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		item newItem = new item(inputItem);
+		newItem.setItem_latest_bid_username(userToAuth.getUserName());
 		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		if( item_impl.getItemByName(newItem.getItemName()) != null)
 		{

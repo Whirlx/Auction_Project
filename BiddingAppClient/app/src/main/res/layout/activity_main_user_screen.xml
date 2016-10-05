@@ -12,22 +12,13 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search Item"
-        android:id="@+id/button"
-        android:layout_marginBottom="20dp"
-        android:onClick="onClickSearchItem"
-        android:layout_above="@+id/button2"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Add Item For Sale"
         android:id="@+id/button2"
-        android:layout_marginBottom="20dp"
         android:onClick="onClickAddItem"
-        android:layout_above="@+id/button3"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignBaseline="@+id/button3"
+        android:layout_alignBottom="@+id/button3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -36,17 +27,17 @@
         android:id="@+id/button3"
         android:onClick="onClickCurrentBids"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View All Users (Admin Only)"
+        android:text="Admin Commands"
         android:id="@+id/ViewAllUsersId"
-        android:layout_marginBottom="26dp"
+        android:onClick="onClickAdminCommands"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="onClickViewAllUsers"/>
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -63,17 +54,37 @@
         android:text="View My Current Auctions"
         android:id="@+id/viewCurrentAuctionsId"
         android:onClick="onClickViewCurrentAuctions"
-        android:layout_marginTop="21dp"
-        android:layout_below="@+id/button3"
+        android:layout_below="@+id/button2"
         android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View Profile"
-        android:id="@+id/viewProfileId"
-        android:onClick="onClickViewProfile"
-        android:layout_below="@+id/helloTextView"
-        android:layout_alignLeft="@+id/button"
-        android:layout_alignStart="@+id/button" />
+        android:text="View All Items"
+        android:id="@+id/viewAllItemsButtonId"
+        android:onClick="onClickViewAllItems"
+        android:layout_alignTop="@+id/viewItemButtonId"
+        android:layout_alignRight="@+id/button3"
+        android:layout_alignEnd="@+id/button3" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Item"
+        android:id="@+id/viewItemButtonId"
+        android:onClick="onClickViewItem"
+        android:layout_below="@+id/viewCurrentAuctionsId"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View Items By Category"
+        android:id="@+id/viewItemsByCategoryButtonId"
+        android:onClick="onClickViewItemsByCategory"
+        android:layout_above="@+id/button2"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

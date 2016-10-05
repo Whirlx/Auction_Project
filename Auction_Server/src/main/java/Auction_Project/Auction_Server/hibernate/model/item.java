@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -32,7 +33,8 @@ public class item {
 	@Column(name="item_desc", length=100, nullable=true)
 	private String item_desc;
 	
-	@Column(name="item_picture", length=10000, nullable=true)
+	@Column(name="item_picture", length=10000000,nullable=true)
+	@Lob
 	private String item_picture;
 
 	@Column(name="item_num_bids", length=100, nullable=true)

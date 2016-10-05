@@ -57,7 +57,7 @@ item_user_id		      int NOT NULL,
 item_category		      varchar(100) NOT NULL,
 item_name			      varchar(100),
 item_desc			      varchar(1000),
-item_picture              varchar(10000),
+item_picture              LONGTEXT,
 item_num_bids             int default 0,
 item_start_price	      bigint,
 item_latest_bid_price	  bigint,
@@ -71,10 +71,10 @@ FOREIGN KEY `fkCategory` (`item_category`) REFERENCES `item_categories` (`item_c
 FOREIGN KEY `fkUserid` (`item_user_id`) REFERENCES `users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 key item_category (item_category),
 unique key item_name  (item_name),
-key item_last_bid_price (item_last_bid_price),
-key item_last_bid_time (item_last_bid_time),
-key item_last_bid_userid (item_last_bid_userid),
-key insert_time (insert_time)
+key item_latest_bid_price (item_latest_bid_price),
+key item_latest_bid_time (item_latest_bid_time),
+key item_latest_bid_userid (item_latest_bid_userid),
+key auction_start_time (auction_start_time)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8

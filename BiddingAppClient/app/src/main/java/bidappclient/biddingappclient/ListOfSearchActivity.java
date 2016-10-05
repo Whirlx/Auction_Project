@@ -17,11 +17,17 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
-public class ListOfSearchActivity extends AppCompatActivity {
-    private ArrayList<AuctionInfo> searchedAuctionsInfoAL;
-    private ArrayList<ItemInfo> searchResultsAL = new ArrayList<ItemInfo>();
+import cz.msebera.android.httpclient.Header;
+
+public class ListOfSearchActivity extends BaseActivity {
+    private ArrayList<JSONObject> list = new ArrayList<JSONObject>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,15 +37,19 @@ public class ListOfSearchActivity extends AppCompatActivity {
         if (itemData == null)
             return;
         String itemString = itemData.getString("searcheditem");
-        invokeSearchingRequest(itemString);
-        // send searched item to server and receive many item objects.
-        /*
-        searchedAuctionsInfoAL = new ArrayList<AuctionInfo>();
+        invokeSearchingRequest(itemString); // now list object is full
+
+
+        //searchedAuctionsInfoAL = new ArrayList<AuctionInfo>();
         ArrayList<String> displayAuctionInfoAL = new ArrayList<String>();
-        for (int i = 0; i < searchedAuctionsInfoAL.size(); i++){
-            displayAuctionInfoAL.add("Item ID: " + searchedAuctionsInfoAL.get(i).getItemId() + "   Item Name: " + searchedAuctionsInfoAL.get(i).getItemName() +
-                    "   Current Bid: " + searchedAuctionsInfoAL.get(i).getLastBidPrice() + "   Remaining Time: " + searchedAuctionsInfoAL.get(i).getRemainingAuctionTime()
-                    + "   Bid Made By: ");
+        for (int i = 0; i < list.size(); i++){
+            try {
+                displayAuctionInfoAL.add("Item ID: " + list.get(i).get("item_id") + "   Item Name: " + list.get(i).get("item_name") +
+                        "   Current Bid: " + list.get(i).get("item_last_bid_price") + "   Description: " + list.get(i).get("item_desc") + "Remaining Time: " + list.get(i).get("update_time")
+                        + "   Bid Made By: ");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         String[] auctionInfosToDisplay = new String[displayAuctionInfoAL.size()];
@@ -53,60 +63,70 @@ public class ListOfSearchActivity extends AppCompatActivity {
                 new AdapterView.OnItemClickListener(){
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        AuctionInfo itemChosen = searchedAuctionsInfoAL.get(position);
-                        String currentBid = itemChosen.getLastBidPrice();
-                        String itemId = itemChosen.getItemId();
+                        String currentBid = "";
+                        String itemId = "";
+                        try {
+                        JSONObject itemChosen = list.get(position);
+                        currentBid = itemChosen.get("item_last_bid_price").toString();
+                        itemId = itemChosen.get("item_id").toString();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         newBid(currentBid, itemId);
                     }
                 }
         );
 
 
-        */
-        String[] items = {"Item ID: " + itemString + "   Current Bid: 50$   Time Left: 7 hours",
-                "Item ID: " + itemString + "   Current Bid: 43$   Time Left: 7 hours   Picture:",
-                "Item ID: " + itemString + "   Current Bid: 41$   Time Left: 4 hours   Picture:",
-                "Item ID: " + itemString + "   Current Bid: 52$   Time Left: 3 hours   Picture:",
-                "Item: ID " + itemString + "   Current Bid: 33$   Time Left: 9 hours   Picture:"};
-        ListAdapter itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-        ListView itemListView = (ListView) findViewById(R.id.listViewId);
-        itemListView.setAdapter(itemsAdapter);
+//        String[] items = {"Item ID: " + itemString + "   Current Bid: 50$   Time Left: 7 hours",
+//                "Item ID: " + itemString + "   Current Bid: 43$   Time Left: 7 hours   Picture:",
+//                "Item ID: " + itemString + "   Current Bid: 41$   Time Left: 4 hours   Picture:",
+//                "Item ID: " + itemString + "   Current Bid: 52$   Time Left: 3 hours   Picture:",
+//                "Item: ID " + itemString + "   Current Bid: 33$   Time Left: 9 hours   Picture:"};
+//        ListAdapter itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+//        ListView itemListView = (ListView) findViewById(R.id.listViewId);
+//        itemListView.setAdapter(itemsAdapter);
 
 
-        itemListView.setOnItemClickListener(
-            new AdapterView.OnItemClickListener(){
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    String itemChosen = String.valueOf(parent.getItemAtPosition(position));
-                    // here send to new screen with the id, ask how much would u like to bid, and send to server.
-                    Toast.makeText(ListOfSearchActivity.this, itemChosen, Toast.LENGTH_LONG).show();
-                }
-            }
-        );
+//        searchedAuctionsListView.setOnItemClickListener(
+//            new AdapterView.OnItemClickListener(){
+//                @Override
+//                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                    String itemChosen = String.valueOf(parent.getItemAtPosition(position));
+//                    // here send to new screen with the id, ask how much would u like to bid, and send to server.
+//                    Toast.makeText(ListOfSearchActivity.this, itemChosen, Toast.LENGTH_LONG).show();
+//                }
+//            }
+//        );
 
     }
 
     public void invokeSearchingRequest(String itemName)
     {
-
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get("http://localhost:8080/Auction_Server/TO-BE-DETERMINED/?itemName = ITEMNAME", new AsyncHttpResponseHandler() { // need to add the json to the send request
-
-            // When the response returned by REST has Http response code '200'
+        client.get("http://localhost:8080/Auction_Server/items/" + itemName, new AsyncHttpResponseHandler() {
             @Override
-            public void onSuccess(String response) {
-                // parse json response into itemInfo objects and insert them to an arrayList
-                searchResultsAL.add(null);
-                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-
+            public void onSuccess(int i, Header[] headers, byte[] bytes)
+            {
+                try {
+                    String response = new String(bytes, "UTF-8");
+                    System.out.println("@@@@@@"+response);
+                    JSONArray itemResultsJSON = new JSONArray(response);
+                    for(int j = 0; j < itemResultsJSON.length(); j++){
+                        list.add(itemResultsJSON.getJSONObject(j));
+                    }
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
             }
 
-
-
             @Override
-            public void onFailure(Throwable e) {
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable)
+            {
                 Toast.makeText(getApplicationContext(), "Item not found.", Toast.LENGTH_LONG).show();
-            }
+            } // need to add the json to the send request
         });
     }
 

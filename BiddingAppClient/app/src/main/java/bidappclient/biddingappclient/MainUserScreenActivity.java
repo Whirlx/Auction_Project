@@ -9,26 +9,29 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class MainUserScreenActivity extends AppCompatActivity {
+public class MainUserScreenActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_user_screen);
-        Bundle usernameData = getIntent().getExtras();
-        if (usernameData == null)
+        Bundle userData = getIntent().getExtras();
+        if (userData == null)
             return;
-        String firstName = usernameData.getString("firstname");
-        String lastName = usernameData.getString("lastname");
+        String firstName  = userData.getString("firstname");
+        String lastName  = userData.getString("lastname");
+        String phoneNumber  = userData.getString("phonenumber");
+        String email  = userData.getString("email");
+        String creationDate  = userData.getString("creationdate");
         final TextView helloText = (TextView) findViewById(R.id.helloTextView);
-        helloText.setText("Welcome " + firstName + " " + lastName + ".");
+        helloText.setText("Welcome " + firstName + " " + lastName + ".\nPhone number: " + phoneNumber +"   E-Mail: " + email + "\nCreation Date: " + creationDate);
     }
 
 
-    public void onClickSearchItem (View view) {
-        Intent i = new Intent (this, SearchingItemActivity.class);
-        startActivity(i);
-    }
+//    public void onClickSearchItem (View view) {
+//        Intent i = new Intent (this, SearchingItemActivity.class);
+//        startActivity(i);
+//    }
 
     public void onClickAddItem (View view){
         Intent i = new Intent (this, AddItemActivity.class);
@@ -50,10 +53,30 @@ public class MainUserScreenActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    public void onClickViewAllUsers (View view) {
-        Intent i = new Intent (this, ViewAllUsersActivity.class);
+    public void onClickAdminCommands (View view) {
+        Intent i = new Intent (this, AdminCommandsActivity.class);
         startActivity(i);
     }
+
+    public void onClickViewAllItems (View view)
+    {
+        Intent i = new Intent (this, ViewAllItemsActivity.class);
+        startActivity(i);
+    }
+
+    public void onClickViewItem (View view)
+    {
+        Intent i = new Intent (this, ViewItemActivity.class);
+        startActivity(i);
+    }
+
+    public void onClickViewItemsByCategory (View view)
+    {
+        Intent i = new Intent (this, ViewItemsByCategoryActivity.class);
+        startActivity(i);
+    }
+
+
 
 
 
