@@ -1,13 +1,11 @@
 package Auction_Project.Auction_Server;
 
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -773,55 +771,55 @@ public class MessageHandler
 	
 	private void issueSuccessMessage(String issuedCommand)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Success.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Success.";
 		logger.info(message);
 	}
 	
 	private void issueHeaderErrorMessage(String issuedCommand)
 	{
-		this.message = "[? @ "+this.userIP+"]->["+issuedCommand+"]: Failure, invalid authentication header.";
+		this.message = "[? @ "+this.userIP+"]-["+issuedCommand+"]: Failure, invalid authentication header.";
 		logger.warning(message);
 	}
 	
 	private void issueAuthenticationErrorMessage(String issuedCommand)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, incorrect username/password.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, incorrect username/password.";
 		logger.warning(message);
 	}
 	
 	private void issueEntityMissingErrorMessage(String issuedCommand, String requestedEntity)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, no such "+requestedEntity+".";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, no such "+requestedEntity+".";
 		logger.warning(message);
 	}
 	
 	private void issueEntityExistsErrorMessage(String issuedCommand, String requestedEntity)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, "+requestedEntity+" already exists.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, "+requestedEntity+" already exists.";
 		logger.warning(message);
 	}
 	
 	private void issueAccessDeniedErrorMessage(String issuedCommand)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, access denied.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, access denied.";
 		logger.warning(message);
 	}
 	
 	private void issueInvalidBidErrorMessage(String issuedCommand, int minBid)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, bid is too low (must be "+minBid+"+).";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, bid is too low (must be "+minBid+"+).";
 		logger.warning(message);
 	}
 	
 	private void issueAdminDeleteErrorMessage(String issuedCommand)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, cannot delete admin user.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, cannot delete admin user.";
 		logger.warning(message);
 	}
 	
 	private void issueAuctionEndedErrorMessage(String issuedCommand)
 	{
-		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, auction already over.";
+		this.message = "["+this.userName+" @ "+this.userIP+"]-["+issuedCommand+"]: Failure, auction already over.";
 		logger.warning(message);
 	}
 	

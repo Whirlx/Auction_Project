@@ -2,34 +2,29 @@ package Auction_Project.Auction_Server.hibernate.Impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-
 import Auction_Project.Auction_Server.hibernate.model.auctionBidTransactions;
-import Auction_Project.Auction_Server.hibernate.model.item;
 
 public class auctionBidTransactionsImpl implements auctionBidTransactionsInterface
 {
+	public static final Logger logger = Logger.getLogger(userImpl.class.getName());
 	private SessionFactory sessionFactory;
 
 	public auctionBidTransactionsImpl(SessionFactory sessionFactory)
 	{
-		if (sessionFactory !=null)
+		if( sessionFactory == null )
 		{
-			this.setSessionFactory(sessionFactory);
-			if (sessionFactory.isClosed() ) 
-			{
-			}
-			else 
-			{
-			//sessionFactory.openSession();
-			}
+			logger.warning("[Hibernate @ auctionBidTransactionsImpl] - Error, received null SessionFactory.");
 		}
-		else
+		if( sessionFactory.isClosed() )
 		{
+			logger.warning("[Hibernate @ auctionBidTransactionsImpl] - Error, SessionFactory is closed.");
 		}
+		this.setSessionFactory(sessionFactory);
+		logger.info("[Hibernate @ auctionBidTransactionsImpl] - Received valid SessionFactory.");
 	}
 	
 	public void setSessionFactory(SessionFactory sessionFactory){
@@ -43,20 +38,18 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 		session.save(bid_trx);
 		tx.commit();
 		session.close();
-	}
-
-	@Override
-	public void updateAuctionBidTransaction(auctionBidTransactions bid_trx) {
-		// TODO Auto-generated method stub
+		logger.info("[Hibernate @ auctionBidTransactionsImpl] - Auction Bid Transaction added successfully.");
 	}
 
 	@Override
 	public List<auctionBidTransactions> listAuctionBidTransactions() {
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
+		@SuppressWarnings("unchecked")
 		List<auctionBidTransactions> transactionsList = session.createQuery("from auctionBidTransactions").list();
 		tx.commit();
 		session.close();
+		logger.info("[Hibernate @ auctionBidTransactionsImpl] - Received Auction Bid Transaction list successfully.");
 		return transactionsList;
 	}
 	
@@ -65,6 +58,7 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 		List<Integer> participatedItemIDsList = new ArrayList<Integer>();
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
+		@SuppressWarnings("unchecked")
 		List<auctionBidTransactions> transactionsListForUser = session.createQuery("from auctionBidTransactions where user_id = "+user_id).list();
 		for(auctionBidTransactions u : transactionsListForUser)
 		{
@@ -76,40 +70,20 @@ public class auctionBidTransactionsImpl implements auctionBidTransactionsInterfa
 		}
 		tx.commit();
 		session.close();
+		logger.info("[Hibernate @ auctionBidTransactionsImpl] - Received participated items list successfully.");
 		return participatedItemIDsList;
 	}
 
-	@Override
-	public auctionBidTransactions getAuctionBidTransactionByID(int auc_bid_trx_id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removeAuctionBidTransactions(int auc_bid_trx_id) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void GetTopBidsForItem(int item_id, int number_of_bids) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void updateWinbid(int item_id) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
+	@Override 
 	public List<auctionBidTransactions> listAuctionBidTransactionsForItemById(int item_id) {
 		Session session = this.sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
+		@SuppressWarnings("unchecked")
 		List<auctionBidTransactions> transactionsList = session.createQuery("from auctionBidTransactions where item_id = "+item_id).list();
 		tx.commit();
 		session.close();
+		logger.info("[Hibernate @ auctionBidTransactionsImpl] - Received Auction Bid Transaction list for item successfully.");
 		return transactionsList;
 	}
-
-	
 
 }
