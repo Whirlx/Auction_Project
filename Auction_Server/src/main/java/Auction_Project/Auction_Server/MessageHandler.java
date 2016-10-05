@@ -219,7 +219,7 @@ public class MessageHandler
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		if( requestedUserName.equals(userToAuth.getUserName()) ) // If checking a different users' auctions
+		if( !requestedUserName.equals(userToAuth.getUserName()) ) // If checking a different users' auctions
 		{
 			if( userToAuth.getUserId() != 0 ) // Not admin
 			{
@@ -265,7 +265,7 @@ public class MessageHandler
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		if( requestedUserName.equals(userToAuth.getUserName()) ) // If checking a different users' auctions
+		if( !requestedUserName.equals(userToAuth.getUserName()) ) // If checking a different users' auctions
 		{
 			if( userToAuth.getUserId() != 0 ) // Not admin
 			{
