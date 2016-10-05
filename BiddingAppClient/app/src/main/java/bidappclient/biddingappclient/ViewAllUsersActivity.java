@@ -62,7 +62,7 @@ public class ViewAllUsersActivity extends BaseActivity {
                         try {
                             searchedItemResultsAL.add("Username: " + jsonList.get(j).get("user_name") +
                                     "\nPassword: " + jsonList.get(j).get("user_pwd") + "\nFirst name: " + jsonList.get(j).get("first_name") + "\nLast name: " + jsonList.get(j).get("last_name") +
-                                    "\nEmail: " + jsonList.get(j).get("email") + "\nPhone number: " + jsonList.get(j).get("phone_number") + "\nLast login time: " + jsonList.get(j).get("last_login_time"));
+                                    "\nEmail: " + jsonList.get(j).get("email") + "\nPhone number: " + jsonList.get(j).get("phone_number") + "\nLast login time: " + jsonList.get(j).get("last_login_time").toString().substring(0,16));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

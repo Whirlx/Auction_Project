@@ -10,21 +10,23 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainUserScreenActivity extends BaseActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_user_screen);
         Bundle userData = getIntent().getExtras();
-        if (userData == null)
-            return;
-        String firstName  = userData.getString("firstname");
-        String lastName  = userData.getString("lastname");
-        String phoneNumber  = userData.getString("phonenumber");
-        String email  = userData.getString("email");
-        String creationDate  = userData.getString("creationdate");
-        final TextView helloText = (TextView) findViewById(R.id.helloTextView);
-        helloText.setText("Welcome " + firstName + " " + lastName + ".\nPhone number: " + phoneNumber +"   E-Mail: " + email + "\nCreation Date: " + creationDate);
+        if (userData != null)
+        {
+            System.out.println("#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+            globalFirstName = userData.getString("firstname");
+            globalLastName = userData.getString("lastname");
+            globalPhoneNumber = userData.getString("phonenumber");
+            globalEmail = userData.getString("email");
+        }
+        TextView helloText = (TextView) findViewById(R.id.helloTextView);
+        TextView helloInfoText = (TextView) findViewById(R.id.helloInfoTextViewId);
+        helloText.setText("Welcome " + globalFirstName + " " + globalLastName + "!");
+        helloInfoText.setText("Phone number: " + globalPhoneNumber + "\nE-Mail: " + globalEmail);
     }
 
 

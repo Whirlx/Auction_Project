@@ -61,8 +61,8 @@ public class item {
 	@Column(name="auction_start_time", length=100, nullable=true)
 	private String auction_start_time;
 	
-	@Column(name="duration_in_hours", length=100, nullable=true)
-	private int duration_in_hours;
+	@Column(name="duration_in_minutes", length=100, nullable=true)
+	private int duration_in_minutes;
 	
 	@Column(name="isAuctionOver", length=100, nullable=true)
 	private boolean isAuctionOver;
@@ -84,7 +84,7 @@ public class item {
 		this.item_latest_bid_userid = item.getItem_latest_bid_userid();
 		this.item_latest_bid_username = item.getItem_latest_bid_username();
 		this.auction_start_time = item.getAuction_start_time();
-		this.duration_in_hours = item.getDuration_in_hours();
+		this.duration_in_minutes = item.getDuration_in_minutes();
 		this.isAuctionOver = item.isAuctionOver();
     }
 	
@@ -102,7 +102,7 @@ public class item {
 				" item_latest_bid_time:" 	+ this.getItem_latest_bid_time() +
 				" item_latest_bid_userid:" 	+ this.getItemUserId() +
 				" auction_start_time:" 	+ this.getAuction_start_time() +
-				" duration_in_hours:" 	+ this.getDuration_in_hours() +
+				" duration_in_minutes:" 	+ this.getDuration_in_minutes() +
 				" isAuctionOver:" 	+ this.isAuctionOver() +
 				"}";
 			
@@ -230,13 +230,13 @@ public class item {
 		this.auction_start_time = auction_start_time;
 	}
 
-	@JsonProperty("duration_in_hours")
-	public int getDuration_in_hours() {
-		return duration_in_hours;
+	@JsonProperty("duration_in_minutes")
+	public int getDuration_in_minutes() {
+		return duration_in_minutes;
 	}
 
-	public void setDuration_in_hours(int duration_in_hours) {
-		this.duration_in_hours = duration_in_hours;
+	public void setDuration_in_minutes(int duration_in_minutes) {
+		this.duration_in_minutes = duration_in_minutes;
 	}
 	
 	@JsonProperty("item_user_name")

@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Please enter the item you would like to view:"
-        android:id="@+id/textView25"
+        android:id="@+id/textviewofitemid"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/itemToViewEditTextId"
-        android:layout_below="@+id/textView25"
+        android:layout_below="@+id/textviewofitemid"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/viewItemInfoTextViewId"
-        android:layout_centerVertical="true"
+        android:layout_below="@+id/submitItemToViewButtonId"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

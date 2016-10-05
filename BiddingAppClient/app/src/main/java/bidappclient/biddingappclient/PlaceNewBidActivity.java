@@ -39,19 +39,17 @@ public class PlaceNewBidActivity extends BaseActivity {
         currentBid = currentBidData.getString("currentbid");
         itemName = currentBidData.getString("itemname");
 
-        TextView minimumBidText = (TextView) findViewById(R.id.NewBidMinimumBidId);
-        minimumBidText.setText("Note: minimum bid of " + (Integer.parseInt(currentBid) + 10));
+        TextView currentBidText = (TextView) findViewById(R.id.NewBidMinimumBidId);
+        currentBidText.setText("Current bid is: " + currentBid);
     }
 
     public void onClickSubmitBid(View view){
         TextView newBidText = (TextView) findViewById(R.id.NewBidNewBidId);
         String newBid = newBidText.getText().toString();
-        if (Integer.parseInt (newBid) >= (Integer.parseInt(currentBid) + 10)) {
             RequestParams bidParams = new RequestParams();
             bidParams.put("price", newBid);
             invokeNewBidOnItem(bidParams, itemName);
-        }
-        else Toast.makeText(PlaceNewBidActivity.this, "Bid too low, minimum bid of: " + currentBid, Toast.LENGTH_LONG).show();
+        //else Toast.makeText(PlaceNewBidActivity.this, "Bid too low, minimum bid of: " + currentBid, Toast.LENGTH_LONG).show();
     }
 
 

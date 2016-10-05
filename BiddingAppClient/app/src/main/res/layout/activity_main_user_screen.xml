@@ -42,11 +42,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello"
         android:id="@+id/helloTextView"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:textColor="#000000"
+        android:textSize="20dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -86,5 +87,14 @@
         android:onClick="onClickViewItemsByCategory"
         android:layout_above="@+id/button2"
         android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/helloInfoTextViewId"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/helloTextView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

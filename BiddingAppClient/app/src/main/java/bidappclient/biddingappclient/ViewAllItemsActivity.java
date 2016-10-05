@@ -1,9 +1,11 @@
 package bidappclient.biddingappclient;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
@@ -56,8 +58,8 @@ public class ViewAllItemsActivity extends BaseActivity {
                         try {
                             displayItemInfoAL.add("Item Name: " + jsonItemList.get(j).get("item_name") + "\nItem Description: " + jsonItemList.get(j).get("item_desc") +
                                     "\nCategory: " + jsonItemList.get(j).get("item_category") + "\nCurrent Bid: " + jsonItemList.get(j).get("item_latest_bid_price") +
-                                    "\nNStarting price: " + jsonItemList.get(j).get("item_start_price") + "\nNumber of Bids: " + jsonItemList.get(j).get("item_num_bids") +
-                                    "\nLatest bid username: " + jsonItemList.get(j).get("item_latest_bid_username") + "\nLast Bid Time: " + jsonItemList.get(j).get("item_latest_bid_time"));
+                                    "\nStarting price: " + jsonItemList.get(j).get("item_start_price") + "\nNumber of Bids: " + jsonItemList.get(j).get("item_num_bids") +
+                                    "\nLatest bid username: " + jsonItemList.get(j).get("item_latest_bid_username") + "\nLast Bid Time: " + jsonItemList.get(j).get("item_latest_bid_time").toString().substring(0,16));
                             System.out.println ("#####################" + displayItemInfoAL.get(j));
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -65,10 +67,35 @@ public class ViewAllItemsActivity extends BaseActivity {
                     }
 
                     String[] auctionInfosToDisplay = new String[displayItemInfoAL.size()];
-                    auctionInfosToDisplay = displayItemInfoAL.toArray(auctionInfosToDisplay);
-                    ListAdapter auctionsInfoAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, auctionInfosToDisplay); // simple_list_item_1, bidappclient.biddingappclient.R.layout.custom_listview
+                    auctionInfosToDisplay = displayItemInfoAL.toArray(auctionInfosToDisplay); // simple_list_item_1, bidappclient.biddingappclient.R.layout.custom_listview
+                    ListAdapter auctionsInfoAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, auctionInfosToDisplay)
+                    {
+                        @Override
+                        public View getView(int position, View convertView, ViewGroup parent) {
+                            View view = super.getView(position, convertView, parent);
+                            try {
+                                System.out.println (" @@@@@@@@@@@@### " + jsonItemList.get(position).get("isAuctionOver"));
+                                if (jsonItemList.get(position).get("isAuctionOver").toString().equals("true"))
+                                    view.setBackgroundColor(Color.parseColor("#66F44336"));
+                                else view.setBackgroundColor(Color.parseColor("#000000"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            return view;
+                        }
+                    };
                     ListView searchedAuctionsListView = (ListView) findViewById(R.id.viewAllItemsListViewId);
                     searchedAuctionsListView.setAdapter(auctionsInfoAdapter);
+//                    View listElement;
+//                    for (int j = 0; j < searchedAuctionsListView.getCount(); j++)
+//                    {
+//                        listElement = searchedAuctionsListView.getChildAt(j);
+//                        if (jsonItemList.get(j).get("item_name").toString().equals("Item1")) {
+//                            System.out.println("#####################@@@@@@@@@@@@@@@@@@@@@@");
+//                            listElement.setBackgroundColor(Color.RED);
+//                            //listElement.set
+//                        }
+//                    }
                     searchedAuctionsListView.setOnItemClickListener(
                             new AdapterView.OnItemClickListener(){
                                 @Override
@@ -77,12 +104,20 @@ public class ViewAllItemsActivity extends BaseActivity {
                                     String itemName = "";
                                     try {
                                         JSONObject itemChosen = jsonItemList.get(position);
-                                        currentBid = itemChosen.get("item_latest_bid_price").toString();
-                                        itemName = itemChosen.get("item_name").toString();
+//                                        if (itemChosen.get("isAuctionOver") == true)
+                                        if (itemChosen.get("isAuctionOver").toString().equals("true")) {
+                                            Toast.makeText(getApplicationContext(), "Auction has already ended.", Toast.LENGTH_LONG).show();
+                                            Intent i = new Intent (getApplicationContext() , MainUserScreenActivity.class);
+                                            startActivity(i);
+                                        }
+                                        else {
+                                            currentBid = itemChosen.get("item_latest_bid_price").toString();
+                                            itemName = itemChosen.get("item_name").toString();
+                                            newBid(currentBid, itemName);
+                                        }
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
-                                    newBid(currentBid, itemName);
                                 }
                             }
                     );

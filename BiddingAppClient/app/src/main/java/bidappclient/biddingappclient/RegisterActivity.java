@@ -30,7 +30,7 @@ import cz.msebera.android.httpclient.HttpEntity;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
 public class RegisterActivity extends BaseActivity {
-
+    private JSONObject jsonObject = new JSONObject();;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,14 +64,13 @@ public class RegisterActivity extends BaseActivity {
 //        params.put("email", emailString);
 //        params.setUseJsonStreamer(true);
 
-        JSONObject jsonObject = new JSONObject();
         jsonObject.put("user_name", usernameString);
         jsonObject.put("user_pwd", passwordString);
         jsonObject.put("first_name", firstnameString);
         jsonObject.put("last_name", lastnameString);
         jsonObject.put("phone_number", phoneString);
         jsonObject.put("email", emailString);
-        invokeRegistrationRequest(jsonObject);
+        invokeRegistrationRequest();
 
         //Toast.makeText(RegisterActivity.this, (usernameString+passwordString+firstnameString+lastnameString+phoneString+emailString), Toast.LENGTH_LONG).show();
 
@@ -81,7 +80,7 @@ public class RegisterActivity extends BaseActivity {
         //startActivity(i);
     }
 
-    public void invokeRegistrationRequest(final JSONObject jsonObject) throws UnsupportedEncodingException {
+    public void invokeRegistrationRequest() throws UnsupportedEncodingException {
         // Show Progress Dialog
         AsyncHttpClient client = new AsyncHttpClient();
         StringEntity entity = new StringEntity(jsonObject.toString());
@@ -93,8 +92,8 @@ public class RegisterActivity extends BaseActivity {
                     String response = new String(bytes, "UTF-8");
                     globalUsername = jsonObject.get("user_name").toString();
                     globalPassword = jsonObject.get("user_pwd").toString();
-                    globalFirstName = jsonObject.get("first_name").toString();
-                    globalLastName = jsonObject.get("last_name").toString();
+                    //globalFirstName = jsonObject.get("first_name").toString();
+                    //globalLastName = jsonObject.get("last_name").toString();
                     Toast.makeText(RegisterActivity.this, response, Toast.LENGTH_LONG).show();
                     navigateToMainScreenActivity(); // need to take first and last name from the json registerUserJson
                 } catch (Exception e) {
@@ -120,6 +119,14 @@ public class RegisterActivity extends BaseActivity {
     public void navigateToMainScreenActivity()
     {
         Intent i = new Intent (this, MainUserScreenActivity.class);
+        try {
+            i.putExtra("firstname", jsonObject.get("first_name").toString());
+            i.putExtra("lastname", jsonObject.get("last_name").toString());
+            i.putExtra("phonenumber", jsonObject.get("phone_number").toString());
+            i.putExtra("email", jsonObject.get("email").toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         startActivity(i);
     }
 

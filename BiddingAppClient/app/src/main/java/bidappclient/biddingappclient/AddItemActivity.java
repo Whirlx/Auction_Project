@@ -71,7 +71,7 @@ public class AddItemActivity extends BaseActivity {
         //addItemJSON.put("item_category", categoryString);
         addItemJSON.put("item_start_price", initialPriceString);
         addItemJSON.put("item_desc", descriptionString);
-        addItemJSON.put("duration_in_hours", lastingBidString);
+        addItemJSON.put("duration_in_minutes", lastingBidString);
         //addItemJSON.put("item_picture", pictureBytes);
         addItemJSON.put("item_picture", pictureBytesString); // @@@@@@@@@@@@@ONE THAT SHOULD WORK
         Intent i = new Intent (this, AddItemChooseCategoryActivity.class);

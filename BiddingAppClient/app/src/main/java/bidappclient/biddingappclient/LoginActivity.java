@@ -3,9 +3,6 @@ package bidappclient.biddingappclient;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import Decoder.BASE64Encoder;
-//import javax.ws.rs.client.Client;
-//import javax.ws.rs.client.ClientBuilder;
-//import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -144,7 +141,6 @@ public class LoginActivity extends BaseActivity {
         // Make RESTful webservice call using AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(userString, password);
-        //String address = "http://10.0.2.2:8080/Auction_Server/users/2/?username=" + username + "&password=" + password;
         client.get("http://" + globalURL + "/Auction_Server/users/" + requestedUser, new AsyncHttpResponseHandler() { // deleted params
 
             @Override
@@ -177,15 +173,18 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
+                prgDialog.hide();
                 String response = "";
-                try {
-                    response = new String(bytes, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                if (i == 0)
+                    Toast.makeText(getApplicationContext(), "Timed out: Could not connect to the server", Toast.LENGTH_LONG).show();
+                else
+                    try {
+                        response = new String(bytes, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
                 }
-                Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-            }
-
         });
     }
 
@@ -216,9 +215,8 @@ public class LoginActivity extends BaseActivity {
 
             @Override
             public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-
+                Toast.makeText(LoginActivity.this, "Could not connect to server.", Toast.LENGTH_LONG).show();
             }
-
         });
     }
 

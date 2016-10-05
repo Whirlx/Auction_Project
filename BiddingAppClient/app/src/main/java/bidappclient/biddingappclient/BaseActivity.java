@@ -8,6 +8,9 @@ public abstract class BaseActivity extends AppCompatActivity
     static String globalPassword;
     static String globalFirstName;
     static String globalLastName;
+    static String globalPhoneNumber;
+    static String globalEmail;
+    static String globalCreationDate;
     static String globalURL = "10.0.2.2:8080";
     // static methods
 }

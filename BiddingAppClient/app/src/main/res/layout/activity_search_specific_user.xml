@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Type which user profile would you like to view:"
-        android:id="@+id/textView24"
+        android:id="@+id/searchUserTextViewId"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/specificUsernameToSearchId"
-        android:layout_below="@+id/textView24"
+        android:layout_below="@+id/searchUserTextViewId"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"

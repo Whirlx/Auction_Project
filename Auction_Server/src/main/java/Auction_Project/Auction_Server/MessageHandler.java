@@ -197,7 +197,7 @@ public class MessageHandler
     @Path("/users/{reqUser}/items") // Path = http://localhost:8080/Auction_Server/users/Admin/items
     public Response viewUserItems(@PathParam("reqUser") String requestedUserName) 
 	{
-		String issuedCommand = "Delete User - "+requestedUserName;
+		String issuedCommand = "View user/own Auctions - "+requestedUserName;
 		String requestedEntity = "user";
 		if( verifyHeader() == false )
 		{
@@ -277,9 +277,10 @@ public class MessageHandler
 		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		List<Integer> participatedItemIDsList = trx_impl.listParticipatedItemIDsForUserByUserID(requestedUser.getUserId());
 		List<item> participatedItemsList = new ArrayList<item>();
+		item itemToAdd;
 		for(Integer i : participatedItemIDsList)
 		{
-			item itemToAdd = new item(item_impl.getItemById(i));
+			itemToAdd = new item(item_impl.getItemById(i));
 			participatedItemsList.add(itemToAdd);
 		}
 		for(item u : participatedItemsList)
@@ -483,6 +484,7 @@ public class MessageHandler
 		newItem.setItemUserId(userToAuth.getUserId());
 		newItem.setItem_user_name(userToAuth.getUserName());
 		newItem.setItem_latest_bid_username("-");
+		newItem.setItemLatestBidPrice(newItem.getItemStartingPrice());
 		Calendar calendar = Calendar.getInstance();
 		Date auction_start_date = calendar.getTime();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -738,9 +740,10 @@ public class MessageHandler
 	{
 		Calendar calendar = Calendar.getInstance();
 		Date server_current_time = calendar.getTime();
-		int durationInHours = requestedItem.getDuration_in_hours();
-		int days = durationInHours/24;
-		int leftOverHours = durationInHours%24;
+		int durationInMinutes = requestedItem.getDuration_in_minutes();
+		int days = durationInMinutes/(24*60);
+		int hours = durationInMinutes/60;
+		int leftOverMinutes = durationInMinutes%60;
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		Date auction_start_time = null;
 		try 
@@ -753,7 +756,8 @@ public class MessageHandler
 		}
 		calendar.setTime(auction_start_time);
 		calendar.add(Calendar.DATE, days);
-		calendar.add(Calendar.HOUR_OF_DAY, leftOverHours);
+		calendar.add(Calendar.HOUR_OF_DAY, hours);
+		calendar.add(Calendar.MINUTE, leftOverMinutes);
 		Date auction_end_time = calendar.getTime();
 		if( server_current_time.compareTo(auction_end_time) >= 0 )
 		{
