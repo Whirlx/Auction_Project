@@ -1,20 +1,19 @@
 package Auction_Project.Auction_Server;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.logging.Logger;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -23,8 +22,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import Auction_Project.Auction_Server.hibernate.HibernateUtil;
 import Auction_Project.Auction_Server.hibernate.Impl.auctionBidTransactionsImpl;
 import Auction_Project.Auction_Server.hibernate.Impl.itemCategoryImpl;
@@ -34,18 +31,7 @@ import Auction_Project.Auction_Server.hibernate.model.user;
 import Auction_Project.Auction_Server.hibernate.model.auctionBidTransactions;
 import Auction_Project.Auction_Server.hibernate.model.item;
 import Auction_Project.Auction_Server.hibernate.model.itemCategory;
-
-import org.apache.tomcat.jdbc.pool.DataSource;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.service.ServiceRegistry;
-
 import sun.misc.BASE64Decoder;
 
 @Path("/") // Full path is: http://localhost:8080/Auction_Server/
@@ -184,8 +170,8 @@ public class MessageHandler
 			issueAuthenticationErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-			
-		if( user_impl.getUserByName(requestedUserName) == null)
+		user requestedUser = user_impl.getUserByName(requestedUserName);
+		if( requestedUser == null)
 		{
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
@@ -195,7 +181,12 @@ public class MessageHandler
 			issueAccessDeniedErrorMessage(issuedCommand);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
-		user_impl.removeUser(user_impl.getUserByName(requestedUserName).getUserId());
+		if( requestedUser.getUserId() == 0 ) // Trying to delete admin
+		{
+			issueAdminDeleteErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
+		user_impl.removeUser(requestedUser.getUserId());
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
     }
@@ -238,8 +229,13 @@ public class MessageHandler
 				return Response.status(400).entity(toJsonString(message)).build(); // Failure
 			}
 		}
+		List<item> itemList = item_impl.listItemsForUserId(requestedUser.getUserId());
+		for(item u : itemList)
+		{
+			isBidOver(u);
+		}
 		issueSuccessMessage(issuedCommand);
-		return Response.status(200).entity(toJsonString(item_impl.listItemsForUserId(requestedUser.getUserId()))).build(); // Success
+		return Response.status(200).entity(toJsonString(itemList)).build(); // Success
 
     }
 	
@@ -288,6 +284,10 @@ public class MessageHandler
 			item itemToAdd = new item(item_impl.getItemById(i));
 			participatedItemsList.add(itemToAdd);
 		}
+		for(item u : participatedItemsList)
+		{
+			isBidOver(u);
+		}
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(participatedItemsList).build(); // Success
     }
@@ -315,7 +315,12 @@ public class MessageHandler
 		}
 		itemImpl item_impl = new itemImpl(this.sessionFactory);
 		issueSuccessMessage(issuedCommand);
-		return Response.status(200).entity(toJsonString(item_impl.listItems())).build(); // Success
+		List<item> itemList = item_impl.listItems();
+		for(item u : itemList)
+		{
+			isBidOver(u);
+		}
+		return Response.status(200).entity(toJsonString(itemList)).build(); // Success
     }
 	
 	/** |===================================================|
@@ -347,8 +352,13 @@ public class MessageHandler
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
 		itemImpl item_impl = new itemImpl(this.sessionFactory);
+		List<item> itemList = item_impl.listItemsByCategoryName(requestedItemCategory);
+		for(item u : itemList)
+		{
+			isBidOver(u);
+		}
 		issueSuccessMessage(issuedCommand);
-		return Response.status(200).entity(toJsonString(item_impl.listItemsByCategoryName(requestedItemCategory))).build(); // Success
+		return Response.status(200).entity(toJsonString(itemList)).build(); // Success
     }
 	
 	/** |=======================================|
@@ -380,6 +390,7 @@ public class MessageHandler
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
+		isBidOver(requestedItem);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(requestedItem)).build(); // Success
     }
@@ -414,6 +425,12 @@ public class MessageHandler
 			issueEntityMissingErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
+		
+		if( isBidOver(requestedItem) == true )
+		{
+			issueAuctionEndedErrorMessage(issuedCommand);
+			return Response.status(400).entity(toJsonString(message)).build(); // Failure
+		}
 		int newBid = Integer.parseInt(price);
 		int oldBid = requestedItem.getItemLatestBidPrice();
 		int minBid = getMininumBid(oldBid);
@@ -422,7 +439,10 @@ public class MessageHandler
 			issueInvalidBidErrorMessage(issuedCommand, minBid);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
+		requestedItem.increaseItem_num_bids();
 		requestedItem.setItemLatestBidPrice(newBid);
+		requestedItem.setItem_latest_bid_userid(userToAuth.getUserId());
+		requestedItem.setItem_latest_bid_username(userToAuth.getUserName());
 		item_impl.updateItem(requestedItem);
 		auctionBidTransactionsImpl trx_impl = new auctionBidTransactionsImpl(this.sessionFactory);
 		auctionBidTransactions bid_trx = new auctionBidTransactions(userToAuth.getUserId(), requestedItem.getItemID(), requestedItem.getItemLatestBidPrice());
@@ -462,6 +482,13 @@ public class MessageHandler
 			issueEntityExistsErrorMessage(issuedCommand, requestedEntity);
 			return Response.status(400).entity(toJsonString(message)).build(); // Failure
 		}
+		newItem.setItemUserId(userToAuth.getUserId());
+		newItem.setItem_user_name(userToAuth.getUserName());
+		newItem.setItem_latest_bid_username("-");
+		Calendar calendar = Calendar.getInstance();
+		Date auction_start_date = calendar.getTime();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		newItem.setAuction_start_time(dateFormat.format(auction_start_date));
 		item_impl.addItem(newItem);
 		issueSuccessMessage(issuedCommand);
 		return Response.status(200).entity(toJsonString(message)).build(); // Success
@@ -709,6 +736,35 @@ public class MessageHandler
 		return minBid;
 	}
 	
+	private boolean isBidOver(item requestedItem)
+	{
+		Calendar calendar = Calendar.getInstance();
+		Date server_current_time = calendar.getTime();
+		int durationInHours = requestedItem.getDuration_in_hours();
+		int days = durationInHours/24;
+		int leftOverHours = durationInHours%24;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		Date auction_start_time = null;
+		try 
+		{
+			auction_start_time = dateFormat.parse(requestedItem.getAuction_start_time());
+		} 
+		catch (ParseException e) 
+		{ 
+			e.printStackTrace(); 
+		}
+		calendar.setTime(auction_start_time);
+		calendar.add(Calendar.DATE, days);
+		calendar.add(Calendar.HOUR_OF_DAY, leftOverHours);
+		Date auction_end_time = calendar.getTime();
+		if( server_current_time.compareTo(auction_end_time) >= 0 )
+		{
+			requestedItem.setAuctionOver(true);
+			return true;
+		}
+		return false;
+	}
+	
 	private void issueWelcomeMessage(String welcomeMessage)
 	{
 		this.message = welcomeMessage;
@@ -754,6 +810,18 @@ public class MessageHandler
 	private void issueInvalidBidErrorMessage(String issuedCommand, int minBid)
 	{
 		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, bid is too low (must be "+minBid+"+).";
+		logger.warning(message);
+	}
+	
+	private void issueAdminDeleteErrorMessage(String issuedCommand)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, cannot delete admin user.";
+		logger.warning(message);
+	}
+	
+	private void issueAuctionEndedErrorMessage(String issuedCommand)
+	{
+		this.message = "["+this.userName+" @ "+this.userIP+"]->["+issuedCommand+"]: Failure, auction already over.";
 		logger.warning(message);
 	}
 	

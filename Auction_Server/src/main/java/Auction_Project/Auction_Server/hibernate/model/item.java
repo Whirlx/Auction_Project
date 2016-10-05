@@ -23,6 +23,9 @@ public class item {
 	@Column(name="item_user_id", length=100, nullable=true)
 	private int item_user_id;
 	
+	@Column(name="item_user_name", length=100, nullable=true)
+	private String item_user_name;
+	
 	@Column(name="item_category", length=100, nullable=true)
 	private String item_category;
 																		
@@ -46,7 +49,7 @@ public class item {
 	@Column(name="item_latest_bid_price", length=100, nullable=true)
 	private int item_latest_bid_price;
 	
-	@Column(name="item_latest_bid_time", length=100, nullable=true)
+	@Column(name="item_latest_bid_time", length=100, nullable=true, updatable = false)
 	private String item_latest_bid_time;
 	
 	@Column(name="item_latest_bid_userid", length=100, nullable=true)
@@ -61,11 +64,15 @@ public class item {
 	@Column(name="duration_in_hours", length=100, nullable=true)
 	private int duration_in_hours;
 	
+	@Column(name="isAuctionOver", length=100, nullable=true)
+	private boolean isAuctionOver;
+
 	public item() {}
 	
 	public item(item item) {
     	this.item_id = item.getItemID();
     	this.item_user_id = item.getItemUserId();
+    	this.item_user_name = item.getItem_user_name();
     	this.item_category = item.getItemCategory();
     	this.item_name = item.getItemName();
     	this.item_picture = item.getItemPicture();
@@ -78,12 +85,14 @@ public class item {
 		this.item_latest_bid_username = item.getItem_latest_bid_username();
 		this.auction_start_time = item.getAuction_start_time();
 		this.duration_in_hours = item.getDuration_in_hours();
+		this.isAuctionOver = item.isAuctionOver();
     }
 	
 	public String toString(){
 		return "\nItem details:{" +
 				" item_id:"   		+ this.getItemID() + 
 				" item_user_id:" 		+ this.getItemUserId() +
+				" item_user_name:"		+ this.getItem_user_name()+
 				" item_category:"		+ this.getItemCategory()+
 				" item_name:" 		+ this.getItemName() +
 				" item_desc:"  		+ this.getItemDescription() +
@@ -94,6 +103,7 @@ public class item {
 				" item_latest_bid_userid:" 	+ this.getItemUserId() +
 				" auction_start_time:" 	+ this.getAuction_start_time() +
 				" duration_in_hours:" 	+ this.getDuration_in_hours() +
+				" isAuctionOver:" 	+ this.isAuctionOver() +
 				"}";
 			
 	}
@@ -161,6 +171,11 @@ public class item {
 		this.item_num_bids = item_num_bids;
 	}
 	
+	public void increaseItem_num_bids()
+	{
+		this.item_num_bids++;
+	}
+	
 	@JsonProperty("item_start_price")
 	public int getItemStartingPrice() {
 		return item_start_price;
@@ -224,4 +239,21 @@ public class item {
 		this.duration_in_hours = duration_in_hours;
 	}
 	
+	@JsonProperty("item_user_name")
+	public String getItem_user_name() {
+		return item_user_name;
+	}
+
+	public void setItem_user_name(String item_user_name) {
+		this.item_user_name = item_user_name;
+	}
+
+	@JsonProperty("isAuctionOver")
+	public boolean isAuctionOver() {
+		return isAuctionOver;
+	}
+
+	public void setAuctionOver(boolean isAuctionOver) {
+		this.isAuctionOver = isAuctionOver;
+	}
 }
