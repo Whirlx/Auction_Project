@@ -55,7 +55,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:minHeight="100dp"
-        android:minWidth="100dp" />
+        android:minHeight="90dp"
+        android:minWidth="200dp" />
 
 </RelativeLayout>

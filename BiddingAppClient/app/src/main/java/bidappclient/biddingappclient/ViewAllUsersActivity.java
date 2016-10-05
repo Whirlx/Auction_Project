@@ -1,51 +1,32 @@
 package bidappclient.biddingappclient;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.List;
-
 import cz.msebera.android.httpclient.Header;
 
+// admin privelege to display all the users using the app
 public class ViewAllUsersActivity extends BaseActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all_users2);
-
- //       RequestParams params = new RequestParams(); // not really needed for now.
-//        params.put("username", globalUsername);
-//        params.put("password", globalPassword);
-//        //invokeLoginRequest(params);
           invokeViewAllUsersRequest();
-
-        /*
-        ListAdapter itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-        ListView itemListView = (ListView) findViewById(R.id.listViewId);
-        itemListView.setAdapter(itemsAdapter);
-         */
     }
 
+    // send the request to receive all users ifnormations and display them in a list
     public void invokeViewAllUsersRequest(){
-        // Make RESTful webservice call using AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(globalUsername, globalPassword);
-        //String address = "http://10.0.2.2:8080/Auction_Server/users/2/?username=" + username + "&password=" + password;
         client.get("http://" + globalURL + "/Auction_Server/users", new AsyncHttpResponseHandler() {
 
             @Override
@@ -67,15 +48,10 @@ public class ViewAllUsersActivity extends BaseActivity {
                             e.printStackTrace();
                         }
                     }
-
-
-                    //String[] usersStringArray = new String[list.size()];
-                    //usersStringArray = list.toArray(usersStringArray);
                     ListAdapter usersAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, searchedItemResultsAL); // android.R.layout.simple_list_item_1
                     ListView itemListView = (ListView) findViewById(R.id.listAllUsersViewId);
                     itemListView.setAdapter(usersAdapter);
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }

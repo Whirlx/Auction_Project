@@ -1,13 +1,13 @@
 package bidappclient.biddingappclient;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+//can change the ip of the server we connect to
 public class ChangeIPActivity extends BaseActivity {
 
     @Override
@@ -18,6 +18,7 @@ public class ChangeIPActivity extends BaseActivity {
         currentIP.setText("Current IP: " + globalURL);
     }
 
+    // button that when clicked changes the ip and notifies
     public void onClickSubmitNewIp(View view)
     {
         EditText newIpView = (EditText) findViewById(R.id.newIpEditTextId);

@@ -1,12 +1,8 @@
 package bidappclient.biddingappclient;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainUserScreenActivity extends BaseActivity {
@@ -17,7 +13,6 @@ public class MainUserScreenActivity extends BaseActivity {
         Bundle userData = getIntent().getExtras();
         if (userData != null)
         {
-            System.out.println("#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
             globalFirstName = userData.getString("firstname");
             globalLastName = userData.getString("lastname");
             globalPhoneNumber = userData.getString("phonenumber");
@@ -30,10 +25,7 @@ public class MainUserScreenActivity extends BaseActivity {
     }
 
 
-//    public void onClickSearchItem (View view) {
-//        Intent i = new Intent (this, SearchingItemActivity.class);
-//        startActivity(i);
-//    }
+
 
     public void onClickAddItem (View view){
         Intent i = new Intent (this, AddItemActivity.class);
@@ -45,10 +37,6 @@ public class MainUserScreenActivity extends BaseActivity {
         startActivity(i);
     }
 
-    public void onClickViewProfile (View view){
-        Intent i = new Intent (this, ViewProfileActivity.class);
-        startActivity(i);
-    }
 
     public void onClickViewCurrentAuctions (View view){
         Intent i = new Intent (this, ViewCurrentAuctionsActivity.class);

@@ -1,25 +1,25 @@
 package bidappclient.biddingappclient;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import org.json.JSONObject;
 import java.io.UnsupportedEncodingException;
 import cz.msebera.android.httpclient.Header;
+
+// admin privilege, searching for a specific user's information
 public class SearchSpecificUserActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_specific_user);
         Bundle userData = getIntent().getExtras();
-        if (userData != null) {
+        if (userData != null) { // if we got here from the auction ended activity
             String usernameToSearch = userData.get("username").toString();
             TextView messageView = (TextView) findViewById(R.id.searchUserTextViewId);
             messageView.setText("Information of the user who won the auction:");
@@ -28,9 +28,9 @@ public class SearchSpecificUserActivity extends BaseActivity {
             Button searchUserButton = (Button) findViewById(R.id.searchProfileSpecificUserButtonId);
             searchUserButton.setVisibility(View.GONE);
                 invokeSearchSpecificUser(usernameToSearch);
-
         }
     }
+
     public void onClickSearchSpecificProfile(View view)
     {
         EditText usernameToSearchView = (EditText) findViewById(R.id.specificUsernameToSearchId);
@@ -41,17 +41,16 @@ public class SearchSpecificUserActivity extends BaseActivity {
         else Toast.makeText(getApplicationContext(), "No username has been entered", Toast.LENGTH_LONG).show();
     }
 
+    // searching and displaying the user's info
     public void invokeSearchSpecificUser(String usernameToSearch){
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(globalUsername, globalPassword);
-        client.get("http://" + globalURL + "/Auction_Server/users/"+usernameToSearch, new AsyncHttpResponseHandler() { // deleted params
-
+        client.get("http://" + globalURL + "/Auction_Server/users/"+usernameToSearch, new AsyncHttpResponseHandler() {
             @Override
             public void onSuccess(int i, Header[] headers, byte[] bytes)
             {
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@"+response);
                     JSONObject obj = new JSONObject(response);
                     String userName = obj.get("user_name").toString();
                     String firstName = obj.get("first_name").toString();
@@ -61,9 +60,7 @@ public class SearchSpecificUserActivity extends BaseActivity {
                     String creationDate = obj.get("insert_time").toString();
                     TextView fillUserInfo = (TextView) findViewById(R.id.fillUserInfoSpecificUserId);
                     fillUserInfo.setText ("Username: "+ userName + "\nFirst name: " + firstName + "\nLast name: " + lastName + "\nPhone number: " + phoneNumber + "\nE-Mail: " + email + "\nAccount creation date: " + creationDate.substring(0,16));
-                    //navigateToMainScreenActivity(firstName, lastName, phoneNumber, email, creationDate);
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }

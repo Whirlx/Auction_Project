@@ -1,45 +1,25 @@
 package bidappclient.biddingappclient;
 
-
 import android.content.pm.PackageManager;
-import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
-//import com.sun.jersey.core.util.Base64; // the base64 encode on server
-import android.view.Menu;
-import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ImageView;
-
-import Decoder.BASE64Decoder;
 import Decoder.BASE64Encoder;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.entity.StringEntity;
 
 
 public class AddItemActivity extends BaseActivity {
-    private ImageView pictureImageView;
-    private String pictureBytesString;
+    private ImageView pictureImageView; // here we will display the image
+    private String pictureBytesString; // variable that contains the picture encoded (base64) into string
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,8 +33,9 @@ public class AddItemActivity extends BaseActivity {
     }
 
 
-
+    // when u click on submit item
     public void onClickSubmitItem(View view) throws JSONException, UnsupportedEncodingException {
+        //retrieve information filled in textviews
         TextView itemNameView = (TextView) findViewById(R.id.itemNameAddId);
         String itemNameString = itemNameView.getText().toString();
         TextView initialPriceView = (TextView) findViewById(R.id.initialPriceAddId);
@@ -63,25 +44,23 @@ public class AddItemActivity extends BaseActivity {
         String lastingBidString = lastingBidView.getText().toString();
         TextView descriptionView = (TextView) findViewById(R.id.descriptionAddId);
         String descriptionString = descriptionView.getText().toString();
-        //TextView categoryView = (TextView) findViewById(R.id.AddItemCategoryId);
-        //String categoryString = categoryView.getText().toString();
 
+        //create json with the information of the item you'd like to add
         JSONObject addItemJSON = new JSONObject();
         addItemJSON.put("item_name", itemNameString);
-        //addItemJSON.put("item_category", categoryString);
         addItemJSON.put("item_start_price", initialPriceString);
         addItemJSON.put("item_desc", descriptionString);
         addItemJSON.put("duration_in_minutes", lastingBidString);
-        //addItemJSON.put("item_picture", pictureBytes);
-        addItemJSON.put("item_picture", pictureBytesString); // @@@@@@@@@@@@@ONE THAT SHOULD WORK
+        addItemJSON.put("item_picture", pictureBytesString);
+
+        // pass to screen of picking a category for the item who you're about to add
         Intent i = new Intent (this, AddItemChooseCategoryActivity.class);
         i.putExtra ("additemjson", addItemJSON.toString());
         startActivity(i);
-
     }
 
     public void navigateToMainScreenActivity()
-    {
+    { // sending you the the main screen of app
         Intent i = new Intent (this, MainUserScreenActivity.class);
         startActivity(i);
     }
@@ -93,9 +72,8 @@ public class AddItemActivity extends BaseActivity {
         startActivityForResult (intent, 1);
     }
 
-    @Override
+    @Override // getting the picture and displaying it
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //super.onActivityResult (requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK)
         {
             Bundle extras = data.getExtras();
@@ -103,25 +81,12 @@ public class AddItemActivity extends BaseActivity {
             pictureImageView.setImageBitmap(picture);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             picture.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] pictureBytes = stream.toByteArray();
-            System.out.println("@@@@@ 1111::: "+pictureBytes+" ###");
-            //String encodedString = org.apache.commons.codec.binary.Base64.encodeBase64String(pictureBytes);
-            //pictureBytesString = Base64.encodeToString(pictureBytes, Base64.DEFAULT);
-            pictureBytesString = new BASE64Encoder().encodeBuffer(pictureBytes);
-            System.out.println("@@@@@ 2222::: "+pictureBytesString+" ###");
-            //byte[] bla = Base64.decode(pictureBytesString, Base64.DEFAULT);
-//            byte[] bla = new byte[0];
-//            try {
-//                bla = new BASE64Decoder().decodeBuffer(pictureBytesString);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            Bitmap test = BitmapFactory.decodeByteArray(bla, 0, bla.length);
-//            pictureImageView.setImageBitmap(test);
+            byte[] pictureBytes = stream.toByteArray(); // picture from bitmap to byte array
+            pictureBytesString = new BASE64Encoder().encodeBuffer(pictureBytes); // byte array encoded into string
         }
     }
 
+    //checks if the smartphone has a camera
     private boolean hasCamera() {
         return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
     }

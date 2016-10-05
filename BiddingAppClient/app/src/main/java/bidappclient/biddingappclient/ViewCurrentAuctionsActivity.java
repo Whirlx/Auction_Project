@@ -2,33 +2,24 @@ package bidappclient.biddingappclient;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import cz.msebera.android.httpclient.Header;
 
+//displays a list of my current auctions and their status
 public class ViewCurrentAuctionsActivity extends BaseActivity {
     private ArrayList<JSONObject> jsonList;
     @Override
@@ -38,6 +29,7 @@ public class ViewCurrentAuctionsActivity extends BaseActivity {
         invokeViewAllMyAuctionsRequest();
     }
 
+    //request the server for my auctions list with the information
     public void invokeViewAllMyAuctionsRequest()
     {
         AsyncHttpClient client = new AsyncHttpClient();
@@ -47,7 +39,6 @@ public class ViewCurrentAuctionsActivity extends BaseActivity {
             public void onSuccess(int i, Header[] headers, byte[] bytes) {
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@" + response);
                     JSONArray jsonArray = new JSONArray(response);
                     jsonList = new ArrayList<JSONObject>();
                     for (int j = 0; j < jsonArray.length(); j++)
@@ -59,16 +50,14 @@ public class ViewCurrentAuctionsActivity extends BaseActivity {
                                     "\nCategory: " + jsonList.get(j).get("item_category") + "\nCurrent Bid: " + jsonList.get(j).get("item_latest_bid_price") +
                                     "\nStarting price: " + jsonList.get(j).get("item_start_price") + "\nNumber of Bids: " + jsonList.get(j).get("item_num_bids") +
                                     "\nLatest bid username: " + jsonList.get(j).get("item_latest_bid_username") + "\nLast Bid Time: " + jsonList.get(j).get("item_latest_bid_time").toString().substring(0,16)
-                                    + "\nAuction duration in hours: " + jsonList.get(j).get("duration_in_minutes"));
+                                    + "\nAuction duration (in minutes): " + jsonList.get(j).get("duration_in_minutes"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
-                    //String[] usersStringArray = new String[list.size()];
-                    //usersStringArray = list.toArray(usersStringArray);
                     ListAdapter usersAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, searchedItemResultsAL)
                     {
-                        @Override
+                        @Override // paints background red of ended auctions, pressing will give the user info
                         public View getView(int position, View convertView, ViewGroup parent) {
                             View view = super.getView(position, convertView, parent);
                             try {
@@ -83,7 +72,7 @@ public class ViewCurrentAuctionsActivity extends BaseActivity {
                         }
                     };
                     ListView itemListView = (ListView) findViewById(R.id.viewMyOwnAuctionListViewId);
-                    itemListView.setAdapter(usersAdapter);
+                    itemListView.setAdapter(usersAdapter); // displaying the list
                     itemListView.setOnItemClickListener(
                             new AdapterView.OnItemClickListener(){
                                 @Override

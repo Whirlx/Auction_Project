@@ -24,11 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainUserScreenActivity" />
-        <activity android:name=".SearchingItemActivity" />
-        <activity android:name=".ListOfSearchActivity" />
         <activity android:name=".AddItemActivity" />
         <activity android:name=".CurrentBidsActivity" />
-        <activity android:name=".ViewProfileActivity" />
         <activity android:name=".ViewCurrentAuctionsActivity" />
         <activity android:name=".ViewAllUsersActivity" />
         <activity android:name=".RegisterActivity" />

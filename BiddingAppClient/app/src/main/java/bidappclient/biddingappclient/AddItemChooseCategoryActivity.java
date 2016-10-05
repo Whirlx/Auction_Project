@@ -24,9 +24,10 @@ import java.util.ArrayList;
 import cz.msebera.android.httpclient.Header;
 import cz.msebera.android.httpclient.entity.StringEntity;
 
+// displaying the categories in which we need to choose from for the item we're adding
 public class AddItemChooseCategoryActivity extends BaseActivity {
-    private ArrayList<JSONObject> jsonCategoryList;
-    private String addItemJSONString;
+    private ArrayList<JSONObject> jsonCategoryList; // json that holds the list of categories
+    private String addItemJSONString; // holds information of the item
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,47 +40,42 @@ public class AddItemChooseCategoryActivity extends BaseActivity {
         invokeChooseCategory();
     }
 
+    // method to request server to receive all categories we need to choose from
     public void invokeChooseCategory ()
     {
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(globalUsername, globalPassword);
         client.get("http://" + globalURL + "/Auction_Server/items/category", new AsyncHttpResponseHandler() {
             @Override
-            public void onSuccess(int i, Header[] headers, byte[] bytes)
+            public void onSuccess(int i, Header[] headers, byte[] bytes) // if server returned success
             {
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@"+response);
                     JSONArray itemResultsJSON = new JSONArray(response);
-                    for(int j = 0; j < itemResultsJSON.length(); j++){
+                    for(int j = 0; j < itemResultsJSON.length(); j++){ // adding the category
                         jsonCategoryList.add(itemResultsJSON.getJSONObject(j));
-                        //System.out.println ("^^^^^^^^^^^^^^^^^  " + jsonItemList.get(j).toString());
                     }
                     ArrayList<String> displayCategoryNamesList = new ArrayList<String>();
                     for (int j = 0; j < jsonCategoryList.size(); j++){
                         try {
                             displayCategoryNamesList.add("Category name: " + jsonCategoryList.get(j).get("item_category_name"));
-                            System.out.println ("#####################" + displayCategoryNamesList.get(j));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
-
-                    String[] CategoryInfoToDisplay = new String[displayCategoryNamesList.size()];
+                    String[] CategoryInfoToDisplay = new String[displayCategoryNamesList.size()]; // string array in order to give to the arrayadapter
                     CategoryInfoToDisplay = displayCategoryNamesList.toArray(CategoryInfoToDisplay);
                     ListAdapter categoryNamesAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, CategoryInfoToDisplay); // android.R.layout.simple_list_item_1
                     ListView CategoriesListView = (ListView) findViewById(R.id.viewCategoriesListViewId);
-                    CategoriesListView.setAdapter(categoryNamesAdapter);
+                    CategoriesListView.setAdapter(categoryNamesAdapter); // displays the list with the categories
                     CategoriesListView.setOnItemClickListener(
                             new AdapterView.OnItemClickListener(){
                                 @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) { // when we click on one of the categories add it to the item add request
                                     try {
                                         JSONObject categoryChosen = jsonCategoryList.get(position);
                                         String categoryName = categoryChosen.get("item_category_name").toString();
-                                        //System.out.println ("^^^^^^^^^^^^^^  " + categoryId);
                                         JSONObject addItemJson = new JSONObject(addItemJSONString);
-                                        //System.out.println (addItemJSONString);
                                         addItemJson.put("item_category", categoryName);
                                         invokeAddItem(addItemJson);
                                     } catch (JSONException e) {
@@ -91,26 +87,23 @@ public class AddItemChooseCategoryActivity extends BaseActivity {
                             }
                     );
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
 
 
             }
-
             @Override
-            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable)
+            public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) // when we received failure from the server
             {
                 Toast.makeText(getApplicationContext(), "Something went wrong with retrieving item list.", Toast.LENGTH_LONG).show();
-            } // need to add the json to the send request
+            }
         });
     }
 
-    public void invokeAddItem (JSONObject addItemJson) throws UnsupportedEncodingException {
+    public void invokeAddItem (JSONObject addItemJson) throws UnsupportedEncodingException { // final request from the server to add the item
         AsyncHttpClient client = new AsyncHttpClient();
         StringEntity entity = new StringEntity(addItemJson.toString());
-        System.out.println ("^^^^^^^^^^^^^^  " + addItemJson);
         client.setBasicAuth(globalUsername, globalPassword);
         client.post(getApplicationContext(), "http://" + globalURL + "/Auction_Server/items/add", entity, "application/json", new AsyncHttpResponseHandler() {
             @Override
@@ -118,7 +111,6 @@ public class AddItemChooseCategoryActivity extends BaseActivity {
                 try {
                     String response = new String(bytes, "UTF-8");
                     Toast.makeText(AddItemChooseCategoryActivity.this, response, Toast.LENGTH_LONG).show();
-                    //navigateToMainScreenActivity(); // need to take first and last name from the json registerUserJson
                 } catch (Exception e) {
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
@@ -128,7 +120,6 @@ public class AddItemChooseCategoryActivity extends BaseActivity {
 
             @Override
             public void onFailure(int i, Header[] headers, byte[] bytes, Throwable throwable) {
-                System.out.println("@@@@@@@@@@@@"+i);
                 String response = "";
                 try {
                     response = new String(bytes, "UTF-8");
@@ -140,7 +131,7 @@ public class AddItemChooseCategoryActivity extends BaseActivity {
         });
     }
 
-
+    // sending us to the main screen
     public void navigateToMainScreenActivity() {
         Intent i = new Intent(this, MainUserScreenActivity.class);
         startActivity(i);

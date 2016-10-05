@@ -2,7 +2,6 @@ package bidappclient.biddingappclient;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,17 +10,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-
 import cz.msebera.android.httpclient.Header;
 
 public class ViewItemsByCategoryActivity extends BaseActivity {
@@ -37,6 +32,7 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
         invokeChooseCategory();
     }
 
+    // first request from the server the list of categories available and let user pick from them
     public void invokeChooseCategory ()
     {
         AsyncHttpClient client = new AsyncHttpClient();
@@ -49,7 +45,6 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                 try {
                     String response = new String(bytes, "UTF-8");
                     JSONArray itemResultsJSON = new JSONArray(response);
-                    System.out.println("@@@@@@"+response + "@@@@@" + itemResultsJSON.length());
                     for(int j = 0; j < itemResultsJSON.length(); j++){
                         jsonCategoryList.add(itemResultsJSON.getJSONObject(j));
                     }
@@ -57,21 +52,20 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                     for (int j = 0; j < jsonCategoryList.size(); j++){
                         try {
                             displayCategoryNamesList.add("Category name: " + jsonCategoryList.get(j).get("item_category_name"));
-                            System.out.println ("#####################" + displayCategoryNamesList.get(j));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                     }
 
                     String[] CategoryInfoToDisplay = new String[displayCategoryNamesList.size()];
-                    CategoryInfoToDisplay = displayCategoryNamesList.toArray(CategoryInfoToDisplay);
+                    CategoryInfoToDisplay = displayCategoryNamesList.toArray(CategoryInfoToDisplay); // displaying the list of cateagories to choose from
                     ListAdapter categoryNamesAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, CategoryInfoToDisplay);
                     ListView CategoriesListView = (ListView) findViewById(R.id.viewCategoriesOfItemsListViewId);
                     CategoriesListView.setAdapter(categoryNamesAdapter);
                     CategoriesListView.setOnItemClickListener(
                             new AdapterView.OnItemClickListener(){
                                 @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) { // when clikcing on certain category request all items from that category from the server and display them
                                     try {
                                         JSONObject categoryChosen = jsonCategoryList.get(position);
                                         String categoryName = categoryChosen.get("item_category_name").toString();
@@ -83,7 +77,6 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                             }
                     );
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
@@ -101,11 +94,12 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                 Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-            } // need to add the json to the send request
+            }
         });
     }
 
 
+    // request all items from a certain category from the server and display them ina  list
     public void retrieveAllItemByCategoryList(String categoryName)
     {
         AsyncHttpClient client = new AsyncHttpClient();
@@ -117,11 +111,9 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                 jsonItemList = new ArrayList<JSONObject>();
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@"+response);
                     JSONArray itemResultsJSON = new JSONArray(response);
                     for(int j = 0; j < itemResultsJSON.length(); j++){
                         jsonItemList.add(itemResultsJSON.getJSONObject(j));
-                        //System.out.println ("^^^^^^^^^^^^^^^^^  " + jsonItemList.get(j).toString());
                     }
 
                     ArrayList<String> displayItemInfoAL = new ArrayList<String>();
@@ -143,9 +135,8 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                     {
                         @Override
                         public View getView(int position, View convertView, ViewGroup parent) {
-                            View view = super.getView(position, convertView, parent);
+                            View view = super.getView(position, convertView, parent); // if auction has alreay ended from certain item, paint it red
                             try {
-                                System.out.println (" @@@@@@@@@@@@### " + jsonItemList.get(position).get("isAuctionOver"));
                                 if (jsonItemList.get(position).get("isAuctionOver").toString().equals("true"))
                                     view.setBackgroundColor(Color.parseColor("#66F44336"));
                                 else view.setBackgroundColor(Color.parseColor("#000000"));
@@ -156,9 +147,9 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                         }
                     };
                     ListView searchedAuctionsListView = (ListView) findViewById(R.id.viewCategoriesOfItemsListViewId);
-                    searchedAuctionsListView.setAdapter(auctionsInfoAdapter);
+                    searchedAuctionsListView.setAdapter(auctionsInfoAdapter); // displaying all items and their info in a list
                     searchedAuctionsListView.setOnItemClickListener(
-                            new AdapterView.OnItemClickListener(){
+                            new AdapterView.OnItemClickListener(){ // allow user to bid on item from the list when clicking (unless auction finished)
                                 @Override
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                     String currentBid = "";
@@ -181,11 +172,7 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                                 }
                             }
                     );
-
-
-
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
@@ -200,7 +187,7 @@ public class ViewItemsByCategoryActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                 Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-            } // need to add the json to the send request
+            }
         });
     }
 

@@ -16,6 +16,8 @@ import java.io.UnsupportedEncodingException;
 
 import cz.msebera.android.httpclient.Header;
 
+
+// admin privilege to ask from the server to delete certain user
 public class DeleteUserActivity extends BaseActivity {
 
     @Override
@@ -24,6 +26,7 @@ public class DeleteUserActivity extends BaseActivity {
         setContentView(R.layout.activity_delete_user);
     }
 
+    //clicking on the delete button will make a request from the server to delete
     public void onClickDeleteUser(View view)
     {
         EditText usernameToDeleteView = (EditText) findViewById(R.id.usernameDeleteUserId);
@@ -31,23 +34,19 @@ public class DeleteUserActivity extends BaseActivity {
         invokeDeleteUser(usernameToDeleteString);
     }
 
-
+    // requesting from the server to delete the user
     public void invokeDeleteUser(String usernameToDelete)
     {
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(globalUsername, globalPassword);
-        System.out.println ("############" + usernameToDelete);
         client.delete("http://" + globalURL + "/Auction_Server/users/" + usernameToDelete + "/delete", new AsyncHttpResponseHandler() { // deleted params
             @Override
             public void onSuccess(int i, Header[] headers, byte[] bytes)
             {
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@"+response);
                     Toast.makeText(DeleteUserActivity.this, response, Toast.LENGTH_LONG).show();
-                    //navigateToMainScreenActivity();
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
@@ -69,6 +68,7 @@ public class DeleteUserActivity extends BaseActivity {
         });
     }
 
+    //sending us to main screen
     public void navigateToMainScreenActivity() {
         Intent i = new Intent(this, MainUserScreenActivity.class);
         startActivity(i);

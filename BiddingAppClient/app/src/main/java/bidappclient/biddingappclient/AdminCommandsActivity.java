@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+
+// this class contains all the buttons of options the admin can do, each button sends us to the appropriate intent (activity)
 public class AdminCommandsActivity extends BaseActivity {
 
     @Override
@@ -37,8 +39,4 @@ public class AdminCommandsActivity extends BaseActivity {
         startActivity(i);
     }
 
-    public void onClickDeleteItemCategory(View view)
-    {
-
-    }
 }

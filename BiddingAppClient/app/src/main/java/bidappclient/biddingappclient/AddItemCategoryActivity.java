@@ -21,33 +21,38 @@ public class AddItemCategoryActivity extends BaseActivity {
         setContentView(R.layout.activity_add_item_category);
     }
 
-
+    // button to add the category name to the server's database
     public void onClickAddNewCategoryName(View view)
     {
         EditText newCategoryNameEditText = (EditText) findViewById(R.id.itemCategoryNameToAddOrDeleteId);
         String newCategoryName = newCategoryNameEditText.getText().toString();
-        invokeAddNewCategoryRequest(newCategoryName, 1);
+        if (newCategoryName.contains(" ")) // checks for invalid input
+            Toast.makeText(getApplicationContext(), "Cannot add category name with spacing. Try again without spaces.", Toast.LENGTH_LONG).show();
+        else invokeAddNewCategoryRequest(newCategoryName, 1);
     }
 
+    // button to delete the category name to the server's database
     public void onClickDeleteCategoryName (View view)
     {
         EditText newCategoryNameEditText = (EditText) findViewById(R.id.itemCategoryNameToAddOrDeleteId);
         String categoryNameToDelete = newCategoryNameEditText.getText().toString();
-        invokeAddNewCategoryRequest(categoryNameToDelete, 0);
+        if (categoryNameToDelete.contains(" ")) // checks for invalid input
+            Toast.makeText(getApplicationContext(), "Cannot delete category name with spacing. Try again without spaces.", Toast.LENGTH_LONG).show();
+        else invokeAddNewCategoryRequest(categoryNameToDelete, 0);
     }
 
-
+    //sending to server the add or delete request
     public void invokeAddNewCategoryRequest(String categoryName, int addOrDelete){ // 0 to delete, 1 to add.
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(globalUsername, globalPassword);
         String path = "";
-        if (addOrDelete == 1)
+        if (addOrDelete == 1) // decided whether we wanted to delete or add the category name and changes the url accordingly
             path = "http://" + globalURL + "/Auction_Server/items/category/add/"+categoryName;
         else path = "http://" + globalURL + "/Auction_Server/items/category/"+categoryName +"/delete";
         AsyncHttpResponseHandler addOrDeleteHandler = returnHandler(path);
         if (addOrDelete == 1)
-            client.post(path, addOrDeleteHandler);
-        else client.delete(path, addOrDeleteHandler);
+            client.post(path, addOrDeleteHandler); // the request to add the category name
+        else client.delete(path, addOrDeleteHandler); // the request to delete the category name
     }
 
 
@@ -59,7 +64,7 @@ public class AddItemCategoryActivity extends BaseActivity {
     }
 
 
-
+    // hander that will either ask server add or delete upon request.
     public AsyncHttpResponseHandler returnHandler(String path) {
         AsyncHttpResponseHandler test = new AsyncHttpResponseHandler() {// deleted params
             @Override

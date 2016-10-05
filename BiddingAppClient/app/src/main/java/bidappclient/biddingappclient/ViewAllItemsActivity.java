@@ -2,7 +2,6 @@ package bidappclient.biddingappclient;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,32 +10,28 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-
 import cz.msebera.android.httpclient.Header;
 
+//class that displays all current items from the server that are open for bidding in the app
 public class ViewAllItemsActivity extends BaseActivity {
 
-    private ArrayList<JSONObject> jsonItemList; // = new ArrayList<JSONObject>;
-
+    private ArrayList<JSONObject> jsonItemList; // will contain the items list that we need to display
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_all_items);
         jsonItemList = new ArrayList<JSONObject>();
         invokeViewAllItemsRequest(); // now list object is full
-        System.out.println ("#####################  " +  jsonItemList.size());
     }
 
+    //request the server for the item list
     public void invokeViewAllItemsRequest()
     {
         AsyncHttpClient client = new AsyncHttpClient();
@@ -47,11 +42,9 @@ public class ViewAllItemsActivity extends BaseActivity {
             {
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@"+response);
                     JSONArray itemResultsJSON = new JSONArray(response);
                     for(int j = 0; j < itemResultsJSON.length(); j++){
                         jsonItemList.add(itemResultsJSON.getJSONObject(j));
-                        System.out.println ("^^^^^^^^^^^^^^^^^  " + jsonItemList.get(j).toString());
                     }
                     ArrayList<String> displayItemInfoAL = new ArrayList<String>();
                     for (int j = 0; j < jsonItemList.size(); j++){
@@ -67,10 +60,10 @@ public class ViewAllItemsActivity extends BaseActivity {
                     }
 
                     String[] auctionInfosToDisplay = new String[displayItemInfoAL.size()];
-                    auctionInfosToDisplay = displayItemInfoAL.toArray(auctionInfosToDisplay); // simple_list_item_1, bidappclient.biddingappclient.R.layout.custom_listview
+                    auctionInfosToDisplay = displayItemInfoAL.toArray(auctionInfosToDisplay);
                     ListAdapter auctionsInfoAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.custom_listview, auctionInfosToDisplay)
                     {
-                        @Override
+                        @Override // paint background red of ended auctions
                         public View getView(int position, View convertView, ViewGroup parent) {
                             View view = super.getView(position, convertView, parent);
                             try {
@@ -85,26 +78,15 @@ public class ViewAllItemsActivity extends BaseActivity {
                         }
                     };
                     ListView searchedAuctionsListView = (ListView) findViewById(R.id.viewAllItemsListViewId);
-                    searchedAuctionsListView.setAdapter(auctionsInfoAdapter);
-//                    View listElement;
-//                    for (int j = 0; j < searchedAuctionsListView.getCount(); j++)
-//                    {
-//                        listElement = searchedAuctionsListView.getChildAt(j);
-//                        if (jsonItemList.get(j).get("item_name").toString().equals("Item1")) {
-//                            System.out.println("#####################@@@@@@@@@@@@@@@@@@@@@@");
-//                            listElement.setBackgroundColor(Color.RED);
-//                            //listElement.set
-//                        }
-//                    }
+                    searchedAuctionsListView.setAdapter(auctionsInfoAdapter); //dispalying all items information on the list
                     searchedAuctionsListView.setOnItemClickListener(
-                            new AdapterView.OnItemClickListener(){
+                            new AdapterView.OnItemClickListener(){ // when clikcing on item that his auction didnt end sends us to bidding screen
                                 @Override
                                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                     String currentBid = "";
                                     String itemName = "";
                                     try {
                                         JSONObject itemChosen = jsonItemList.get(position);
-//                                        if (itemChosen.get("isAuctionOver") == true)
                                         if (itemChosen.get("isAuctionOver").toString().equals("true")) {
                                             Toast.makeText(getApplicationContext(), "Auction has already ended.", Toast.LENGTH_LONG).show();
                                             Intent i = new Intent (getApplicationContext() , MainUserScreenActivity.class);
@@ -122,7 +104,6 @@ public class ViewAllItemsActivity extends BaseActivity {
                             }
                     );
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
@@ -140,11 +121,12 @@ public class ViewAllItemsActivity extends BaseActivity {
                     e.printStackTrace();
                 }
                 Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
-            } // need to add the json to the send request
+            }
         });
     }
 
 
+    //sending us to the new bid screen on that item we clicked
     public void newBid (String currentBid, String itemName)
     {
         Intent i = new Intent (this, PlaceNewBidActivity.class);

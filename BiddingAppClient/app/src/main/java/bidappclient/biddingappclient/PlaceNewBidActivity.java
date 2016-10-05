@@ -1,33 +1,19 @@
 package bidappclient.biddingappclient;
 
-import java.util.ArrayList;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.content.Intent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-
-import org.json.JSONObject;
-
 import cz.msebera.android.httpclient.Header;
 
-
+// placing a new bid on an item class
 public class PlaceNewBidActivity extends BaseActivity {
-
-    private String currentBid;
-    private String itemName;
+    private String currentBid; // will store the current bid of that item
+    private String itemName; // the item on which we will bid
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,34 +29,30 @@ public class PlaceNewBidActivity extends BaseActivity {
         currentBidText.setText("Current bid is: " + currentBid);
     }
 
+    //pressing the button to request a new bid from the server on that item
     public void onClickSubmitBid(View view){
         TextView newBidText = (TextView) findViewById(R.id.NewBidNewBidId);
         String newBid = newBidText.getText().toString();
             RequestParams bidParams = new RequestParams();
             bidParams.put("price", newBid);
             invokeNewBidOnItem(bidParams, itemName);
-        //else Toast.makeText(PlaceNewBidActivity.this, "Bid too low, minimum bid of: " + currentBid, Toast.LENGTH_LONG).show();
     }
 
 
+    // sending the new bid request to the server
     public void invokeNewBidOnItem(RequestParams bidParams, String itemName)
     {
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(globalUsername, globalPassword);
-
-        //String address = "http://10.0.2.2:8080/Auction_Server/users/2/?username=" + username + "&password=" + password;
-        System.out.println ("@@@@@@@@@@@@@@@@  " + itemName);
         client.get("http://" + globalURL + "/Auction_Server/items/"+itemName+"/bid", bidParams, new AsyncHttpResponseHandler() { // deleted params
             @Override
             public void onSuccess(int i, Header[] headers, byte[] bytes)
             {
                 try {
                     String response = new String(bytes, "UTF-8");
-                    System.out.println("@@@@@@"+response);
                     Toast.makeText(getApplicationContext(), response, Toast.LENGTH_LONG).show();
                     navigateToMainScreenActivity();
                 } catch (Exception e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
                 }
