@@ -635,7 +635,7 @@ public class MessageHandler
 	
 	@GET 
     @Path("/transactions/{reqItemName}") // Path = http://localhost:8080/Auction_Server/transactions/Item1
-    public Response viewAllAuctionTransactions(@PathParam("reqItemName") String requestedItemName) 
+    public Response viewAuctionTransactions(@PathParam("reqItemName") String requestedItemName) 
 	{
 		String issuedCommand = "View auction transactions for - "+requestedItemName;
 		String requestedEntity = "item";
