@@ -55,7 +55,7 @@ create table items(
 item_id				      int NOT NULL AUTO_INCREMENT,			
 item_user_id		      int NOT NULL,
 item_user_name            varchar(100) NOT NULL,
-item_category		      varchar(100) NOT NULL,
+item_category		      varchar(100) NOT NULL on delete default Default,
 item_name			      varchar(100),
 item_desc			      varchar(1000),
 item_picture              LONGTEXT,
